@@ -39,4 +39,4 @@ USER app
 EXPOSE 8000
 
 # Run FastAPI application
-ENTRYPOINT ["python", "-m", "callie.api.app"] 
+ENTRYPOINT ["poetry", "run", "python", "-m", "callie.api.app"] 
