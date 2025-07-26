@@ -561,7 +561,8 @@ async def get_connector_info(service_type: str):
 def main():
     """Main entry point for the API server."""
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    port = int(os.getenv("PORT", 8000))
+    uvicorn.run(app, host="0.0.0.0", port=port)
 
 if __name__ == "__main__":
     main() 
