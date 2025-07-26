@@ -3,7 +3,7 @@ set -e
 
 # Get service URL
 if [ -z "$SERVICE_URL" ]; then
-    SERVICE_URL="https://callie-api-123456-uc.a.run.app"  # Update this with actual URL
+    SERVICE_URL="https://callie-api-4mrdokvqlq-uc.a.run.app"
 fi
 
 echo "🔧 Creating sample ShipStation → InfiPlex sync configuration..."
