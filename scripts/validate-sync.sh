@@ -23,7 +23,7 @@ fi
 
 # Run validation
 echo -e "${YELLOW}📊 Running validation check...${NC}"
-poetry run inventory-sync bulk-sync --all-skus --warehouse-id $WAREHOUSE_ID --validate-only
+poetry run callie bulk-sync --all-skus --warehouse-id $WAREHOUSE_ID --validate-only
 
 echo
 echo -e "${GREEN}✅ Validation completed!${NC}" 

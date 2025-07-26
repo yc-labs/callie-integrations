@@ -30,4 +30,4 @@ USER appuser
 
 # Set Python path and entrypoint
 ENV PYTHONPATH=/app/src
-ENTRYPOINT ["python", "-m", "inventory_sync.cli"] 
+ENTRYPOINT ["python", "-m", "callie.core.cli"] 
