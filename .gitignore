@@ -103,3 +103,8 @@ sync_analysis.txt
 
 # Google Cloud
 .gcloudignore 
+
+# Local development
+.env
+credentials.json
+docker-compose.override.yml 

@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  callie-api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    ports:
+      - "8000:8000"
+    environment:
+      - PORT=8000
+      - GCP_PROJECT_ID=yc-partners
+      - GOOGLE_APPLICATION_CREDENTIALS=/app/credentials.json
+      - SHIPSTATION_API_KEY=${SHIPSTATION_API_KEY}
+      - INFIPLEX_API_KEY=${INFIPLEX_API_KEY}
+    volumes:
+      - ./credentials.json:/app/credentials.json:ro  # Mount service account key
+      - ./src:/app/src  # Mount source for hot reload during development
+    command: ["poetry", "run", "python", "-m", "callie.api.app"]
+    restart: unless-stopped 

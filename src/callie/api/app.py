@@ -129,7 +129,9 @@ class UpdateConfigRequest(BaseModel):
 
 
 class SyncRequest(BaseModel):
+    """Request to trigger a sync operation."""
     triggered_by: str = Field("api", description="What triggered this sync")
+    sync_mode: str = Field("async", description="Sync mode: 'async' (background) or 'sync' (wait for completion)")
 
 
 class ScheduleRequest(BaseModel):
@@ -327,30 +329,52 @@ async def trigger_sync(
         if not config.active:
             raise HTTPException(status_code=400, detail="Configuration is not active")
         
-        # Execute sync in background
-        def run_sync():
-            try:
-                execution = engine.execute_sync(config, triggered_by=request.triggered_by)
-                
-                # Save execution to Firestore
-                fs.create_execution(execution)
-                
-                # Update config last sync time
-                if execution.completed_at:
-                    fs.update_config_last_sync(config_id, execution.completed_at)
-                
-            except Exception as e:
-                logger.error(f"Background sync failed for {config_id}: {e}")
+        # Check sync mode
+        logger.info(f"Received sync request with mode: '{request.sync_mode}' for config {config_id}")
         
-        background_tasks.add_task(run_sync)
+        if request.sync_mode == "sync":
+            # Execute synchronously and return detailed results
+            logger.info(f"Starting synchronous sync for config {config_id}")
+            execution = engine.execute_sync(config, triggered_by=request.triggered_by)
+            
+            # Save execution to Firestore
+            fs.create_execution(execution)
+            
+            # Update config last sync time
+            if execution.completed_at:
+                fs.update_config_last_sync(config_id, execution.completed_at)
+            
+            logger.info(f"Sync completed for {config_id}: {execution.total_items} items, "
+                       f"{execution.success_count} success, {execution.failed_count} failed, "
+                       f"{execution.skipped_count} skipped")
+            
+            return execution
         
-        # Return immediate response
-        return SyncExecution(
-            id="pending",
-            config_id=config_id,
-            status="running",
-            triggered_by=request.triggered_by
-        )
+        else:
+            # Execute sync in background (existing behavior)
+            def run_sync():
+                try:
+                    execution = engine.execute_sync(config, triggered_by=request.triggered_by)
+                    
+                    # Save execution to Firestore
+                    fs.create_execution(execution)
+                    
+                    # Update config last sync time
+                    if execution.completed_at:
+                        fs.update_config_last_sync(config_id, execution.completed_at)
+                    
+                except Exception as e:
+                    logger.error(f"Background sync failed for {config_id}: {e}")
+            
+            background_tasks.add_task(run_sync)
+            
+            # Return immediate response
+            return SyncExecution(
+                id="pending",
+                config_id=config_id,
+                status="running",
+                triggered_by=request.triggered_by
+            )
         
     except HTTPException:
         raise
@@ -364,7 +388,7 @@ async def get_sync_status(
     config_id: str,
     fs: FirestoreService = Depends(get_firestore_service)
 ):
-    """Get sync status and statistics for a configuration."""
+    """Get detailed sync status and statistics for a configuration."""
     try:
         # Get config
         config = fs.get_config(config_id)
@@ -377,13 +401,77 @@ async def get_sync_status(
         # Get statistics
         stats = fs.get_config_stats(config_id)
         
+        # Calculate additional metrics
+        total_executions = len(executions)
+        successful_executions = len([e for e in executions if e.status == "completed" and e.failed_count == 0])
+        failed_executions = len([e for e in executions if e.status == "failed" or e.failed_count > 0])
+        
+        # Get latest execution details
+        latest_execution = executions[0] if executions else None
+        
+        # Calculate success rate
+        success_rate = (successful_executions / total_executions * 100) if total_executions > 0 else 0
+        
+        # Get average execution time
+        completed_executions = [e for e in executions if e.execution_time_seconds is not None]
+        avg_execution_time = (
+            sum(e.execution_time_seconds for e in completed_executions) / len(completed_executions)
+            if completed_executions else None
+        )
+        
         return {
-            "config_id": config_id,
-            "config_name": config.name,
-            "active": config.active,
-            "last_sync_at": config.last_sync_at,
-            "recent_executions": [exec.get_summary() for exec in executions],
-            "statistics": stats
+            "config": {
+                "id": config_id,
+                "name": config.name,
+                "description": config.description,
+                "active": config.active,
+                "last_sync_at": config.last_sync_at.isoformat() if config.last_sync_at else None,
+                "source_service": config.source.service_type,
+                "target_service": config.target.service_type
+            },
+            "latest_execution": {
+                "id": latest_execution.id if latest_execution else None,
+                "status": latest_execution.status if latest_execution else None,
+                "started_at": latest_execution.started_at.isoformat() if latest_execution and latest_execution.started_at else None,
+                "completed_at": latest_execution.completed_at.isoformat() if latest_execution and latest_execution.completed_at else None,
+                "execution_time_seconds": latest_execution.execution_time_seconds if latest_execution else None,
+                "total_items": latest_execution.total_items if latest_execution else 0,
+                "success_count": latest_execution.success_count if latest_execution else 0,
+                "failed_count": latest_execution.failed_count if latest_execution else 0,
+                "skipped_count": latest_execution.skipped_count if latest_execution else 0,
+                "triggered_by": latest_execution.triggered_by if latest_execution else None,
+                "error_message": latest_execution.error_message if latest_execution else None
+            },
+            "performance_metrics": {
+                "total_executions": total_executions,
+                "successful_executions": successful_executions,
+                "failed_executions": failed_executions,
+                "success_rate_percent": round(success_rate, 2),
+                "average_execution_time_seconds": round(avg_execution_time, 2) if avg_execution_time else None,
+                "total_items_synced": stats.get("total_items_synced", 0),
+                "total_successful_items": stats.get("total_successful_items", 0),
+                "total_failed_items": stats.get("total_failed_items", 0)
+            },
+            "recent_executions": [
+                {
+                    "id": exec.id,
+                    "status": exec.status,
+                    "started_at": exec.started_at.isoformat() if exec.started_at else None,
+                    "completed_at": exec.completed_at.isoformat() if exec.completed_at else None,
+                    "total_items": exec.total_items,
+                    "success_count": exec.success_count,
+                    "failed_count": exec.failed_count,
+                    "skipped_count": exec.skipped_count,
+                    "execution_time_seconds": exec.execution_time_seconds,
+                    "triggered_by": exec.triggered_by
+                }
+                for exec in executions
+            ],
+            "health_status": {
+                "overall": "healthy" if success_rate >= 80 and (not latest_execution or latest_execution.status in ["completed"]) else "degraded" if success_rate >= 50 else "unhealthy",
+                "last_success": executions[0].completed_at.isoformat() if executions and executions[0].status == "completed" else None,
+                "consecutive_failures": len([e for e in executions if e.status == "failed"]) if executions and executions[0].status == "failed" else 0
+            }
         }
         
     except HTTPException:
@@ -419,6 +507,71 @@ async def get_execution(
         if not execution:
             raise HTTPException(status_code=404, detail="Execution not found")
         return execution
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Failed to get execution {execution_id}: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/v1/configs/{config_id}/executions/{execution_id}")
+async def get_execution_details(
+    config_id: str,
+    execution_id: str,
+    fs: FirestoreService = Depends(get_firestore_service)
+):
+    """Get detailed information about a specific sync execution."""
+    try:
+        # Get the execution
+        execution = fs.get_execution(execution_id)
+        if not execution:
+            raise HTTPException(status_code=404, detail="Execution not found")
+        
+        if execution.config_id != config_id:
+            raise HTTPException(status_code=404, detail="Execution not found for this configuration")
+        
+        # Group results by status for summary
+        results_by_status = {}
+        for result in execution.results:
+            status = result.status
+            if status not in results_by_status:
+                results_by_status[status] = []
+            results_by_status[status].append({
+                "sku": result.sku,
+                "source_value": result.source_value,
+                "target_value": result.target_value,
+                "message": result.message,
+                "processed_at": result.processed_at.isoformat() if result.processed_at else None
+            })
+        
+        # Calculate detailed metrics
+        execution_details = {
+            "execution": {
+                "id": execution.id,
+                "config_id": execution.config_id,
+                "status": execution.status,
+                "started_at": execution.started_at.isoformat() if execution.started_at else None,
+                "completed_at": execution.completed_at.isoformat() if execution.completed_at else None,
+                "execution_time_seconds": execution.execution_time_seconds,
+                "triggered_by": execution.triggered_by,
+                "error_message": execution.error_message
+            },
+            "summary": {
+                "total_items": execution.total_items,
+                "success_count": execution.success_count,
+                "failed_count": execution.failed_count,
+                "skipped_count": execution.skipped_count,
+                "success_rate_percent": round((execution.success_count / execution.total_items * 100) if execution.total_items > 0 else 0, 2)
+            },
+            "results_by_status": results_by_status,
+            "performance": {
+                "items_per_second": round(execution.total_items / execution.execution_time_seconds, 2) if execution.execution_time_seconds and execution.execution_time_seconds > 0 else None,
+                "average_time_per_item_ms": round((execution.execution_time_seconds * 1000) / execution.total_items, 2) if execution.total_items > 0 and execution.execution_time_seconds else None
+            }
+        }
+        
+        return execution_details
+        
     except HTTPException:
         raise
     except Exception as e:
@@ -556,6 +709,66 @@ async def get_connector_info(service_type: str):
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to get connector info: {e}")
+
+
+class TestFieldsRequest(BaseModel):
+    credentials: Dict[str, str]
+    base_url: str
+    limit: int = 5
+
+@app.post("/api/v1/connectors/{service_type}/test-fields")
+async def test_connector_fields(
+    service_type: str,
+    request: TestFieldsRequest
+):
+    """
+    Test a connector and return sample data with available fields.
+    This helps with field mapping configuration.
+    """
+    try:
+        if service_type not in CONNECTOR_REGISTRY:
+            raise HTTPException(status_code=400, detail=f"Unknown service type: {service_type}")
+        
+        # Create connector instance
+        connector_class = CONNECTOR_REGISTRY[service_type]
+        connector = connector_class(
+            credentials=request.credentials,
+            base_url=request.base_url
+        )
+        
+        # Test connection first
+        if not connector.test_connection():
+            raise HTTPException(status_code=400, detail=f"Cannot connect to {service_type} API")
+        
+        # Get sample inventory data to show available fields
+        sample_data = connector.read_inventory(limit=request.limit)
+        
+        # Extract unique field names from sample data
+        available_fields = set()
+        for item in sample_data:
+            available_fields.update(item.keys())
+        
+        # Get sample values for each field
+        field_examples = {}
+        if sample_data:
+            first_item = sample_data[0]
+            for field in available_fields:
+                field_examples[field] = first_item.get(field)
+        
+        return {
+            "service_type": service_type,
+            "connection_status": "success",
+            "available_fields": sorted(list(available_fields)),
+            "field_examples": field_examples,
+            "sample_count": len(sample_data),
+            "sample_data": sample_data[:2] if sample_data else []  # Show first 2 items
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Failed to test {service_type} fields: {e}")
+        raise HTTPException(status_code=500, detail=f"Error testing connector: {str(e)}")
 
 
 def main():
