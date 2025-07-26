@@ -116,6 +116,7 @@ class ShipStationConnector(BaseConnector):
         limit = filters.get("limit", 500)
         
         # Build query parameters
+        # Note: ShipStation appears to have a fixed page size of ~50 items regardless of limit
         params = {"limit": min(limit, 500)}  # ShipStation max is 500
         if "sku" in filters:
             params["sku"] = filters["sku"]
@@ -127,6 +128,7 @@ class ShipStationConnector(BaseConnector):
             params["group_by"] = filters["group_by"]
         
         try:
+            total_pages = None
             while True:
                 params["page"] = page
                 
@@ -145,7 +147,14 @@ class ShipStationConnector(BaseConnector):
                 data = response.json()
                 inventory_items = data.get("inventory", [])
                 
+                # Get total pages from first response
+                if total_pages is None:
+                    total_pages = data.get("pages", 1)
+                    total_items = data.get("total", 0)
+                    logger.info(f"ShipStation API reports {total_items} total items across {total_pages} pages")
+                
                 if not inventory_items:
+                    logger.info(f"No inventory items returned on page {page}, stopping")
                     break
                 
                 # Convert to standard format
@@ -160,18 +169,23 @@ class ShipStationConnector(BaseConnector):
                         "inventory_location_id": item.get("inventory_location_id")
                     })
                 
-                # Check if we've fetched enough or if this is the last page
-                if len(all_items) >= limit or len(inventory_items) < params["limit"]:
+                logger.info(f"Fetched {len(inventory_items)} items from page {page}, total so far: {len(all_items)}")
+                
+                # Check if we've fetched enough items (respect user's limit)
+                if len(all_items) >= limit:
+                    logger.info(f"Reached requested limit of {limit} items")
                     break
                     
-                # Check for pagination
-                if page >= data.get("pages", 1):
+                # Check if we've reached the last page
+                if page >= total_pages:
+                    logger.info(f"Reached last page {total_pages}")
                     break
                     
                 page += 1
             
-            logger.info(f"Successfully fetched {len(all_items)} inventory items from ShipStation")
-            return all_items[:limit]  # Ensure we don't exceed requested limit
+            final_items = all_items[:limit]  # Ensure we don't exceed requested limit
+            logger.info(f"Successfully fetched {len(final_items)} inventory items from ShipStation (out of {len(all_items)} total fetched)")
+            return final_items
             
         except requests.exceptions.RequestException as e:
             raise ShipStationAPIError(f"Request failed: {e}")
