@@ -29,5 +29,4 @@ requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
-callie = "callie.core.cli:main"
 callie-api = "callie.api.app:main" 

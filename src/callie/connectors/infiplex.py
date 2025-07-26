@@ -5,7 +5,7 @@ InfiPlex connector for reading and writing inventory data.
 import requests
 import logging
 from typing import Dict, List, Any, Optional
-from ..core.exceptions import InfiPlexAPIError
+from ..exceptions import InfiPlexAPIError
 from .base import BaseConnector, ConnectorCapability, ConnectorSchema, ConnectorField
 
 logger = logging.getLogger(__name__)

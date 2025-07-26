@@ -5,7 +5,7 @@ ShipStation connector for reading inventory data.
 import requests
 import logging
 from typing import Dict, List, Any, Optional
-from ..core.exceptions import ShipStationAPIError
+from ..exceptions import ShipStationAPIError
 from .base import BaseConnector, ConnectorCapability, ConnectorSchema, ConnectorField
 
 logger = logging.getLogger(__name__)

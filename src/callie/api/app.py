@@ -35,8 +35,23 @@ async def lifespan(app: FastAPI):
     region = os.getenv("GOOGLE_CLOUD_REGION", "us-central1")
     
     try:
-        firestore_service = FirestoreService(project_id=project_id)
-        scheduler_service = SchedulerService(project_id=project_id, region=region)
+        # Initialize Firestore service
+        try:
+            firestore_service = FirestoreService(project_id=project_id)
+            logger.info("Firestore service initialized successfully")
+        except ImportError as e:
+            logger.warning(f"Firestore service not available: {e}")
+            firestore_service = None
+        
+        # Initialize Scheduler service  
+        try:
+            scheduler_service = SchedulerService(project_id=project_id, region=region)
+            logger.info("Scheduler service initialized successfully")
+        except ImportError as e:
+            logger.warning(f"Scheduler service not available: {e}")
+            scheduler_service = None
+        
+        # Initialize sync engine
         sync_engine = SyncEngine()
         logger.info("Services initialized successfully")
     except Exception as e:
