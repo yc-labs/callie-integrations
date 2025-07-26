@@ -113,11 +113,14 @@ class ShipStationConnector(BaseConnector):
         """
         all_items = []
         page = 1
-        limit = filters.get("limit", 500)
+        limit = filters.get("limit")  # No default limit - fetch all items
         
         # Build query parameters
         # Note: ShipStation appears to have a fixed page size of ~50 items regardless of limit
-        params = {"limit": min(limit, 500)}  # ShipStation max is 500
+        params = {"limit": 500}  # ShipStation max per page is 500
+        if limit:
+            # If a specific limit is requested, respect it
+            params["limit"] = min(limit, 500)
         if "sku" in filters:
             params["sku"] = filters["sku"]
         if "inventory_warehouse_id" in filters:
@@ -172,7 +175,7 @@ class ShipStationConnector(BaseConnector):
                 logger.info(f"Fetched {len(inventory_items)} items from page {page}, total so far: {len(all_items)}")
                 
                 # Check if we've fetched enough items (respect user's limit)
-                if len(all_items) >= limit:
+                if limit and len(all_items) >= limit:
                     logger.info(f"Reached requested limit of {limit} items")
                     break
                     
@@ -183,7 +186,7 @@ class ShipStationConnector(BaseConnector):
                     
                 page += 1
             
-            final_items = all_items[:limit]  # Ensure we don't exceed requested limit
+            final_items = all_items[:limit] if limit else all_items  # Ensure we don't exceed requested limit
             logger.info(f"Successfully fetched {len(final_items)} inventory items from ShipStation (out of {len(all_items)} total fetched)")
             return final_items
             
