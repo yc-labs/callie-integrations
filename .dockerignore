@@ -1,0 +1,35 @@
+# Documentation
+docs/
+
+# Development
+.env
+.venv/
+.pytest_cache/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+
+# Scripts (not needed in container)
+scripts/
+deploy.sh
+
+# Testing
+tests/
+.coverage
+.tox/ 

@@ -1,0 +1,833 @@
+2025-07-26 15:33:19 - root - INFO - Loaded environment from .env
+🔄 Fetching ALL SKUs from ShipStation...
+2025-07-26 15:33:19 - inventory_sync.shipstation_client - INFO - Fetching page 1 of inventory
+2025-07-26 15:33:19 - inventory_sync.shipstation_client - INFO - Fetching page 2 of inventory
+2025-07-26 15:33:19 - inventory_sync.shipstation_client - INFO - Fetching page 3 of inventory
+2025-07-26 15:33:20 - inventory_sync.shipstation_client - INFO - Fetching page 4 of inventory
+2025-07-26 15:33:20 - inventory_sync.shipstation_client - INFO - Fetching page 5 of inventory
+2025-07-26 15:33:20 - inventory_sync.shipstation_client - INFO - Fetching page 6 of inventory
+2025-07-26 15:33:20 - inventory_sync.shipstation_client - INFO - Fetching page 7 of inventory
+2025-07-26 15:33:20 - inventory_sync.shipstation_client - INFO - Fetching page 8 of inventory
+2025-07-26 15:33:20 - inventory_sync.shipstation_client - INFO - Fetching page 9 of inventory
+2025-07-26 15:33:20 - inventory_sync.shipstation_client - INFO - Fetching page 10 of inventory
+2025-07-26 15:33:20 - inventory_sync.shipstation_client - INFO - Fetching page 11 of inventory
+2025-07-26 15:33:20 - inventory_sync.shipstation_client - INFO - Fetching page 12 of inventory
+2025-07-26 15:33:20 - inventory_sync.shipstation_client - INFO - Fetching page 13 of inventory
+2025-07-26 15:33:21 - inventory_sync.shipstation_client - INFO - Fetching page 14 of inventory
+2025-07-26 15:33:21 - inventory_sync.shipstation_client - INFO - Fetching page 15 of inventory
+2025-07-26 15:33:21 - inventory_sync.shipstation_client - INFO - Fetching page 16 of inventory
+2025-07-26 15:33:21 - inventory_sync.shipstation_client - INFO - Retrieved 800 total inventory items
+
+📊 Found 800 SKUs to process:
+----------------------------------------------------------------------------------------------------
+SKU: 49ERS-TATTOOS        | SS: 36    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: AMINCO-52523         | SS: 69    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: AMINCO-52525         | SS: 79    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: AMINCO-52526         | SS: 108   | IP: Not Found  | ❓ NOT_FOUND 
+SKU: AMINCO-52527         | SS: 96    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: BC-00890             | SS: 2     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: BEARS-"C"-TATTOOS    | SS: 59    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: CHIEFS-TATTOOS       | SS: 22    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: DOLPHOINS-TATTOOS    | SS: 25    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EW-02759             | SS: 3     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EW-02802             | SS: 4     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EW-02836             | SS: 52    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EW-05416             | SS: 39    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-LFF            | SS: 60    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-LGF            | SS: 47    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-LLL            | SS: 64    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-LMF            | SS: 32    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-LRF            | SS: 46    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-NUR            | SS: 57    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-PHS            | SS: 24    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-PRIB           | SS: 56    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-30050             | SS: 12    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-60502             | SS: 19    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-60507             | SS: 3     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-60510             | SS: 12    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-60516             | SS: 12    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-60524             | SS: 8     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-60526             | SS: 2     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-62202             | SS: 10    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-62216             | SS: 9     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-62220             | SS: 14    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-68816             | SS: 5     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-87912             | SS: 18    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-90205             | SS: 1     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-90214             | SS: 1     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-90237             | SS: 3     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-90242             | SS: 5     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-90503             | SS: 1     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-90528             | SS: 5     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-98801             | SS: 15    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FI-31705             | SS: 1     | IP: 1          | ✅ MATCH     
+SKU: FI-31713             | SS: 4     | IP: 4          | ✅ MATCH     
+SKU: G-114203             | SS: 6     | IP: 6          | ✅ MATCH     
+SKU: G-12828              | SS: 109   | IP: 109        | ✅ MATCH     
+SKU: G-14079              | SS: 284   | IP: 284        | ✅ MATCH     
+SKU: G-19116              | SS: 297   | IP: 297        | ✅ MATCH     
+SKU: G-19955              | SS: 27    | IP: 27         | ✅ MATCH     
+SKU: G-220880             | SS: 2     | IP: 2          | ✅ MATCH     
+SKU: G-223242             | SS: 1     | IP: 1          | ✅ MATCH     
+SKU: G-22933              | SS: 2     | IP: 2          | ✅ MATCH     
+SKU: 49ERS-TATTOOS        | SS: 36    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: AMINCO-52523         | SS: 69    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: AMINCO-52525         | SS: 79    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: AMINCO-52526         | SS: 108   | IP: Not Found  | ❓ NOT_FOUND 
+SKU: AMINCO-52527         | SS: 96    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: BC-00890             | SS: 2     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: BEARS-"C"-TATTOOS    | SS: 59    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: CHIEFS-TATTOOS       | SS: 22    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: DOLPHOINS-TATTOOS    | SS: 25    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EW-02759             | SS: 3     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EW-02802             | SS: 4     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EW-02836             | SS: 52    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EW-05416             | SS: 39    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-LFF            | SS: 60    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-LGF            | SS: 47    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-LLL            | SS: 64    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-LMF            | SS: 32    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-LRF            | SS: 46    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-NUR            | SS: 57    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-PHS            | SS: 24    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-PRIB           | SS: 56    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-30050             | SS: 12    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-60502             | SS: 19    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-60507             | SS: 3     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-60510             | SS: 12    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-60516             | SS: 12    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-60524             | SS: 8     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-60526             | SS: 2     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-62202             | SS: 10    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-62216             | SS: 9     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-62220             | SS: 14    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-68816             | SS: 5     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-87912             | SS: 18    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-90205             | SS: 1     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-90214             | SS: 1     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-90237             | SS: 3     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-90242             | SS: 5     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-90503             | SS: 1     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-90528             | SS: 5     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-98801             | SS: 15    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FI-31705             | SS: 1     | IP: 1          | ✅ MATCH     
+SKU: FI-31713             | SS: 4     | IP: 4          | ✅ MATCH     
+SKU: G-114203             | SS: 6     | IP: 6          | ✅ MATCH     
+SKU: G-12828              | SS: 109   | IP: 109        | ✅ MATCH     
+SKU: G-14079              | SS: 284   | IP: 284        | ✅ MATCH     
+SKU: G-19116              | SS: 297   | IP: 297        | ✅ MATCH     
+SKU: G-19955              | SS: 27    | IP: 27         | ✅ MATCH     
+SKU: G-220880             | SS: 2     | IP: 2          | ✅ MATCH     
+SKU: G-223242             | SS: 1     | IP: 1          | ✅ MATCH     
+SKU: G-22933              | SS: 2     | IP: 2          | ✅ MATCH     
+SKU: 49ERS-TATTOOS        | SS: 36    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: AMINCO-52523         | SS: 69    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: AMINCO-52525         | SS: 79    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: AMINCO-52526         | SS: 108   | IP: Not Found  | ❓ NOT_FOUND 
+SKU: AMINCO-52527         | SS: 96    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: BC-00890             | SS: 2     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: BEARS-"C"-TATTOOS    | SS: 59    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: CHIEFS-TATTOOS       | SS: 22    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: DOLPHOINS-TATTOOS    | SS: 25    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EW-02759             | SS: 3     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EW-02802             | SS: 4     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EW-02836             | SS: 52    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EW-05416             | SS: 39    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-LFF            | SS: 60    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-LGF            | SS: 47    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-LLL            | SS: 64    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-LMF            | SS: 32    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-LRF            | SS: 46    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-NUR            | SS: 57    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-PHS            | SS: 24    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-PRIB           | SS: 56    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-30050             | SS: 12    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-60502             | SS: 19    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-60507             | SS: 3     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-60510             | SS: 12    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-60516             | SS: 12    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-60524             | SS: 8     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-60526             | SS: 2     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-62202             | SS: 10    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-62216             | SS: 9     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-62220             | SS: 14    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-68816             | SS: 5     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-87912             | SS: 18    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-90205             | SS: 1     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-90214             | SS: 1     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-90237             | SS: 3     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-90242             | SS: 5     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-90503             | SS: 1     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-90528             | SS: 5     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-98801             | SS: 15    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FI-31705             | SS: 1     | IP: 1          | ✅ MATCH     
+SKU: FI-31713             | SS: 4     | IP: 4          | ✅ MATCH     
+SKU: G-114203             | SS: 6     | IP: 6          | ✅ MATCH     
+SKU: G-12828              | SS: 109   | IP: 109        | ✅ MATCH     
+SKU: G-14079              | SS: 284   | IP: 284        | ✅ MATCH     
+SKU: G-19116              | SS: 297   | IP: 297        | ✅ MATCH     
+SKU: G-19955              | SS: 27    | IP: 27         | ✅ MATCH     
+SKU: G-220880             | SS: 2     | IP: 2          | ✅ MATCH     
+SKU: G-223242             | SS: 1     | IP: 1          | ✅ MATCH     
+SKU: G-22933              | SS: 2     | IP: 2          | ✅ MATCH     
+SKU: 49ERS-TATTOOS        | SS: 36    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: AMINCO-52523         | SS: 69    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: AMINCO-52525         | SS: 79    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: AMINCO-52526         | SS: 108   | IP: Not Found  | ❓ NOT_FOUND 
+SKU: AMINCO-52527         | SS: 96    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: BC-00890             | SS: 2     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: BEARS-"C"-TATTOOS    | SS: 59    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: CHIEFS-TATTOOS       | SS: 22    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: DOLPHOINS-TATTOOS    | SS: 25    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EW-02759             | SS: 3     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EW-02802             | SS: 4     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EW-02836             | SS: 52    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EW-05416             | SS: 39    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-LFF            | SS: 60    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-LGF            | SS: 47    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-LLL            | SS: 64    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-LMF            | SS: 32    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-LRF            | SS: 46    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-NUR            | SS: 57    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-PHS            | SS: 24    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-PRIB           | SS: 56    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-30050             | SS: 12    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-60502             | SS: 19    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-60507             | SS: 3     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-60510             | SS: 12    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-60516             | SS: 12    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-60524             | SS: 8     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-60526             | SS: 2     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-62202             | SS: 10    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-62216             | SS: 9     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-62220             | SS: 14    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-68816             | SS: 5     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-87912             | SS: 18    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-90205             | SS: 1     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-90214             | SS: 1     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-90237             | SS: 3     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-90242             | SS: 5     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-90503             | SS: 1     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-90528             | SS: 5     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-98801             | SS: 15    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FI-31705             | SS: 1     | IP: 1          | ✅ MATCH     
+SKU: FI-31713             | SS: 4     | IP: 4          | ✅ MATCH     
+SKU: G-114203             | SS: 6     | IP: 6          | ✅ MATCH     
+SKU: G-12828              | SS: 109   | IP: 109        | ✅ MATCH     
+SKU: G-14079              | SS: 284   | IP: 284        | ✅ MATCH     
+SKU: G-19116              | SS: 297   | IP: 297        | ✅ MATCH     
+SKU: G-19955              | SS: 27    | IP: 27         | ✅ MATCH     
+SKU: G-220880             | SS: 2     | IP: 2          | ✅ MATCH     
+SKU: G-223242             | SS: 1     | IP: 1          | ✅ MATCH     
+SKU: G-22933              | SS: 2     | IP: 2          | ✅ MATCH     
+SKU: 49ERS-TATTOOS        | SS: 36    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: AMINCO-52523         | SS: 69    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: AMINCO-52525         | SS: 79    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: AMINCO-52526         | SS: 108   | IP: Not Found  | ❓ NOT_FOUND 
+SKU: AMINCO-52527         | SS: 96    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: BC-00890             | SS: 2     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: BEARS-"C"-TATTOOS    | SS: 59    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: CHIEFS-TATTOOS       | SS: 22    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: DOLPHOINS-TATTOOS    | SS: 25    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EW-02759             | SS: 3     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EW-02802             | SS: 4     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EW-02836             | SS: 52    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EW-05416             | SS: 39    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-LFF            | SS: 60    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-LGF            | SS: 47    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-LLL            | SS: 64    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-LMF            | SS: 32    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-LRF            | SS: 46    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-NUR            | SS: 57    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-PHS            | SS: 24    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-PRIB           | SS: 56    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-30050             | SS: 12    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-60502             | SS: 19    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-60507             | SS: 3     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-60510             | SS: 12    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-60516             | SS: 12    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-60524             | SS: 8     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-60526             | SS: 2     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-62202             | SS: 10    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-62216             | SS: 9     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-62220             | SS: 14    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-68816             | SS: 5     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-87912             | SS: 18    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-90205             | SS: 1     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-90214             | SS: 1     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-90237             | SS: 3     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-90242             | SS: 5     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-90503             | SS: 1     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-90528             | SS: 5     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-98801             | SS: 15    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FI-31705             | SS: 1     | IP: 1          | ✅ MATCH     
+SKU: FI-31713             | SS: 4     | IP: 4          | ✅ MATCH     
+SKU: G-114203             | SS: 6     | IP: 6          | ✅ MATCH     
+SKU: G-12828              | SS: 109   | IP: 109        | ✅ MATCH     
+SKU: G-14079              | SS: 284   | IP: 284        | ✅ MATCH     
+SKU: G-19116              | SS: 297   | IP: 297        | ✅ MATCH     
+SKU: G-19955              | SS: 27    | IP: 27         | ✅ MATCH     
+SKU: G-220880             | SS: 2     | IP: 2          | ✅ MATCH     
+SKU: G-223242             | SS: 1     | IP: 1          | ✅ MATCH     
+SKU: G-22933              | SS: 2     | IP: 2          | ✅ MATCH     
+SKU: 49ERS-TATTOOS        | SS: 36    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: AMINCO-52523         | SS: 69    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: AMINCO-52525         | SS: 79    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: AMINCO-52526         | SS: 108   | IP: Not Found  | ❓ NOT_FOUND 
+SKU: AMINCO-52527         | SS: 96    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: BC-00890             | SS: 2     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: BEARS-"C"-TATTOOS    | SS: 59    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: CHIEFS-TATTOOS       | SS: 22    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: DOLPHOINS-TATTOOS    | SS: 25    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EW-02759             | SS: 3     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EW-02802             | SS: 4     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EW-02836             | SS: 52    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EW-05416             | SS: 39    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-LFF            | SS: 60    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-LGF            | SS: 47    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-LLL            | SS: 64    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-LMF            | SS: 32    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-LRF            | SS: 46    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-NUR            | SS: 57    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-PHS            | SS: 24    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-PRIB           | SS: 56    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-30050             | SS: 12    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-60502             | SS: 19    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-60507             | SS: 3     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-60510             | SS: 12    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-60516             | SS: 12    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-60524             | SS: 8     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-60526             | SS: 2     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-62202             | SS: 10    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-62216             | SS: 9     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-62220             | SS: 14    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-68816             | SS: 5     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-87912             | SS: 18    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-90205             | SS: 1     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-90214             | SS: 1     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-90237             | SS: 3     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-90242             | SS: 5     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-90503             | SS: 1     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-90528             | SS: 5     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-98801             | SS: 15    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FI-31705             | SS: 1     | IP: 1          | ✅ MATCH     
+SKU: FI-31713             | SS: 4     | IP: 4          | ✅ MATCH     
+SKU: G-114203             | SS: 6     | IP: 6          | ✅ MATCH     
+SKU: G-12828              | SS: 109   | IP: 109        | ✅ MATCH     
+SKU: G-14079              | SS: 284   | IP: 284        | ✅ MATCH     
+SKU: G-19116              | SS: 297   | IP: 297        | ✅ MATCH     
+SKU: G-19955              | SS: 27    | IP: 27         | ✅ MATCH     
+SKU: G-220880             | SS: 2     | IP: 2          | ✅ MATCH     
+SKU: G-223242             | SS: 1     | IP: 1          | ✅ MATCH     
+SKU: G-22933              | SS: 2     | IP: 2          | ✅ MATCH     
+SKU: 49ERS-TATTOOS        | SS: 36    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: AMINCO-52523         | SS: 69    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: AMINCO-52525         | SS: 79    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: AMINCO-52526         | SS: 108   | IP: Not Found  | ❓ NOT_FOUND 
+SKU: AMINCO-52527         | SS: 96    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: BC-00890             | SS: 2     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: BEARS-"C"-TATTOOS    | SS: 59    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: CHIEFS-TATTOOS       | SS: 22    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: DOLPHOINS-TATTOOS    | SS: 25    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EW-02759             | SS: 3     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EW-02802             | SS: 4     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EW-02836             | SS: 52    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EW-05416             | SS: 39    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-LFF            | SS: 60    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-LGF            | SS: 47    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-LLL            | SS: 64    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-LMF            | SS: 32    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-LRF            | SS: 46    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-NUR            | SS: 57    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-PHS            | SS: 24    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-PRIB           | SS: 56    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-30050             | SS: 12    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-60502             | SS: 19    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-60507             | SS: 3     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-60510             | SS: 12    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-60516             | SS: 12    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-60524             | SS: 8     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-60526             | SS: 2     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-62202             | SS: 10    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-62216             | SS: 9     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-62220             | SS: 14    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-68816             | SS: 5     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-87912             | SS: 18    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-90205             | SS: 1     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-90214             | SS: 1     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-90237             | SS: 3     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-90242             | SS: 5     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-90503             | SS: 1     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-90528             | SS: 5     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-98801             | SS: 15    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FI-31705             | SS: 1     | IP: 1          | ✅ MATCH     
+SKU: FI-31713             | SS: 4     | IP: 4          | ✅ MATCH     
+SKU: G-114203             | SS: 6     | IP: 6          | ✅ MATCH     
+SKU: G-12828              | SS: 109   | IP: 109        | ✅ MATCH     
+SKU: G-14079              | SS: 284   | IP: 284        | ✅ MATCH     
+SKU: G-19116              | SS: 297   | IP: 297        | ✅ MATCH     
+SKU: G-19955              | SS: 27    | IP: 27         | ✅ MATCH     
+SKU: G-220880             | SS: 2     | IP: 2          | ✅ MATCH     
+SKU: G-223242             | SS: 1     | IP: 1          | ✅ MATCH     
+SKU: G-22933              | SS: 2     | IP: 2          | ✅ MATCH     
+SKU: 49ERS-TATTOOS        | SS: 36    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: AMINCO-52523         | SS: 69    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: AMINCO-52525         | SS: 79    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: AMINCO-52526         | SS: 108   | IP: Not Found  | ❓ NOT_FOUND 
+SKU: AMINCO-52527         | SS: 96    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: BC-00890             | SS: 2     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: BEARS-"C"-TATTOOS    | SS: 59    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: CHIEFS-TATTOOS       | SS: 22    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: DOLPHOINS-TATTOOS    | SS: 25    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EW-02759             | SS: 3     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EW-02802             | SS: 4     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EW-02836             | SS: 52    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EW-05416             | SS: 39    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-LFF            | SS: 60    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-LGF            | SS: 47    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-LLL            | SS: 64    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-LMF            | SS: 32    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-LRF            | SS: 46    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-NUR            | SS: 57    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-PHS            | SS: 24    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-PRIB           | SS: 56    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-30050             | SS: 12    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-60502             | SS: 19    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-60507             | SS: 3     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-60510             | SS: 12    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-60516             | SS: 12    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-60524             | SS: 8     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-60526             | SS: 2     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-62202             | SS: 10    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-62216             | SS: 9     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-62220             | SS: 14    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-68816             | SS: 5     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-87912             | SS: 18    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-90205             | SS: 1     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-90214             | SS: 1     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-90237             | SS: 3     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-90242             | SS: 5     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-90503             | SS: 1     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-90528             | SS: 5     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-98801             | SS: 15    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FI-31705             | SS: 1     | IP: 1          | ✅ MATCH     
+SKU: FI-31713             | SS: 4     | IP: 4          | ✅ MATCH     
+SKU: G-114203             | SS: 6     | IP: 6          | ✅ MATCH     
+SKU: G-12828              | SS: 109   | IP: 109        | ✅ MATCH     
+SKU: G-14079              | SS: 284   | IP: 284        | ✅ MATCH     
+SKU: G-19116              | SS: 297   | IP: 297        | ✅ MATCH     
+SKU: G-19955              | SS: 27    | IP: 27         | ✅ MATCH     
+SKU: G-220880             | SS: 2     | IP: 2          | ✅ MATCH     
+SKU: G-223242             | SS: 1     | IP: 1          | ✅ MATCH     
+SKU: G-22933              | SS: 2     | IP: 2          | ✅ MATCH     
+SKU: 49ERS-TATTOOS        | SS: 36    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: AMINCO-52523         | SS: 69    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: AMINCO-52525         | SS: 79    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: AMINCO-52526         | SS: 108   | IP: Not Found  | ❓ NOT_FOUND 
+SKU: AMINCO-52527         | SS: 96    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: BC-00890             | SS: 2     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: BEARS-"C"-TATTOOS    | SS: 59    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: CHIEFS-TATTOOS       | SS: 22    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: DOLPHOINS-TATTOOS    | SS: 25    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EW-02759             | SS: 3     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EW-02802             | SS: 4     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EW-02836             | SS: 52    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EW-05416             | SS: 39    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-LFF            | SS: 60    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-LGF            | SS: 47    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-LLL            | SS: 64    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-LMF            | SS: 32    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-LRF            | SS: 46    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-NUR            | SS: 57    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-PHS            | SS: 24    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-PRIB           | SS: 56    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-30050             | SS: 12    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-60502             | SS: 19    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-60507             | SS: 3     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-60510             | SS: 12    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-60516             | SS: 12    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-60524             | SS: 8     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-60526             | SS: 2     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-62202             | SS: 10    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-62216             | SS: 9     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-62220             | SS: 14    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-68816             | SS: 5     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-87912             | SS: 18    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-90205             | SS: 1     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-90214             | SS: 1     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-90237             | SS: 3     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-90242             | SS: 5     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-90503             | SS: 1     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-90528             | SS: 5     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-98801             | SS: 15    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FI-31705             | SS: 1     | IP: 1          | ✅ MATCH     
+SKU: FI-31713             | SS: 4     | IP: 4          | ✅ MATCH     
+SKU: G-114203             | SS: 6     | IP: 6          | ✅ MATCH     
+SKU: G-12828              | SS: 109   | IP: 109        | ✅ MATCH     
+SKU: G-14079              | SS: 284   | IP: 284        | ✅ MATCH     
+SKU: G-19116              | SS: 297   | IP: 297        | ✅ MATCH     
+SKU: G-19955              | SS: 27    | IP: 27         | ✅ MATCH     
+SKU: G-220880             | SS: 2     | IP: 2          | ✅ MATCH     
+SKU: G-223242             | SS: 1     | IP: 1          | ✅ MATCH     
+SKU: G-22933              | SS: 2     | IP: 2          | ✅ MATCH     
+SKU: 49ERS-TATTOOS        | SS: 36    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: AMINCO-52523         | SS: 69    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: AMINCO-52525         | SS: 79    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: AMINCO-52526         | SS: 108   | IP: Not Found  | ❓ NOT_FOUND 
+SKU: AMINCO-52527         | SS: 96    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: BC-00890             | SS: 2     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: BEARS-"C"-TATTOOS    | SS: 59    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: CHIEFS-TATTOOS       | SS: 22    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: DOLPHOINS-TATTOOS    | SS: 25    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EW-02759             | SS: 3     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EW-02802             | SS: 4     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EW-02836             | SS: 52    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EW-05416             | SS: 39    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-LFF            | SS: 60    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-LGF            | SS: 47    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-LLL            | SS: 64    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-LMF            | SS: 32    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-LRF            | SS: 46    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-NUR            | SS: 57    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-PHS            | SS: 24    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-PRIB           | SS: 56    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-30050             | SS: 12    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-60502             | SS: 19    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-60507             | SS: 3     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-60510             | SS: 12    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-60516             | SS: 12    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-60524             | SS: 8     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-60526             | SS: 2     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-62202             | SS: 10    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-62216             | SS: 9     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-62220             | SS: 14    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-68816             | SS: 5     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-87912             | SS: 18    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-90205             | SS: 1     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-90214             | SS: 1     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-90237             | SS: 3     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-90242             | SS: 5     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-90503             | SS: 1     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-90528             | SS: 5     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-98801             | SS: 15    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FI-31705             | SS: 1     | IP: 1          | ✅ MATCH     
+SKU: FI-31713             | SS: 4     | IP: 4          | ✅ MATCH     
+SKU: G-114203             | SS: 6     | IP: 6          | ✅ MATCH     
+SKU: G-12828              | SS: 109   | IP: 109        | ✅ MATCH     
+SKU: G-14079              | SS: 284   | IP: 284        | ✅ MATCH     
+SKU: G-19116              | SS: 297   | IP: 297        | ✅ MATCH     
+SKU: G-19955              | SS: 27    | IP: 27         | ✅ MATCH     
+SKU: G-220880             | SS: 2     | IP: 2          | ✅ MATCH     
+SKU: G-223242             | SS: 1     | IP: 1          | ✅ MATCH     
+SKU: G-22933              | SS: 2     | IP: 2          | ✅ MATCH     
+SKU: 49ERS-TATTOOS        | SS: 36    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: AMINCO-52523         | SS: 69    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: AMINCO-52525         | SS: 79    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: AMINCO-52526         | SS: 108   | IP: Not Found  | ❓ NOT_FOUND 
+SKU: AMINCO-52527         | SS: 96    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: BC-00890             | SS: 2     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: BEARS-"C"-TATTOOS    | SS: 59    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: CHIEFS-TATTOOS       | SS: 22    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: DOLPHOINS-TATTOOS    | SS: 25    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EW-02759             | SS: 3     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EW-02802             | SS: 4     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EW-02836             | SS: 52    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EW-05416             | SS: 39    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-LFF            | SS: 60    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-LGF            | SS: 47    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-LLL            | SS: 64    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-LMF            | SS: 32    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-LRF            | SS: 46    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-NUR            | SS: 57    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-PHS            | SS: 24    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-PRIB           | SS: 56    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-30050             | SS: 12    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-60502             | SS: 19    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-60507             | SS: 3     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-60510             | SS: 12    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-60516             | SS: 12    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-60524             | SS: 8     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-60526             | SS: 2     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-62202             | SS: 10    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-62216             | SS: 9     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-62220             | SS: 14    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-68816             | SS: 5     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-87912             | SS: 18    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-90205             | SS: 1     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-90214             | SS: 1     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-90237             | SS: 3     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-90242             | SS: 5     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-90503             | SS: 1     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-90528             | SS: 5     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-98801             | SS: 15    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FI-31705             | SS: 1     | IP: 1          | ✅ MATCH     
+SKU: FI-31713             | SS: 4     | IP: 4          | ✅ MATCH     
+SKU: G-114203             | SS: 6     | IP: 6          | ✅ MATCH     
+SKU: G-12828              | SS: 109   | IP: 109        | ✅ MATCH     
+SKU: G-14079              | SS: 284   | IP: 284        | ✅ MATCH     
+SKU: G-19116              | SS: 297   | IP: 297        | ✅ MATCH     
+SKU: G-19955              | SS: 27    | IP: 27         | ✅ MATCH     
+SKU: G-220880             | SS: 2     | IP: 2          | ✅ MATCH     
+SKU: G-223242             | SS: 1     | IP: 1          | ✅ MATCH     
+SKU: G-22933              | SS: 2     | IP: 2          | ✅ MATCH     
+SKU: 49ERS-TATTOOS        | SS: 36    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: AMINCO-52523         | SS: 69    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: AMINCO-52525         | SS: 79    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: AMINCO-52526         | SS: 108   | IP: Not Found  | ❓ NOT_FOUND 
+SKU: AMINCO-52527         | SS: 96    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: BC-00890             | SS: 2     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: BEARS-"C"-TATTOOS    | SS: 59    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: CHIEFS-TATTOOS       | SS: 22    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: DOLPHOINS-TATTOOS    | SS: 25    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EW-02759             | SS: 3     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EW-02802             | SS: 4     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EW-02836             | SS: 52    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EW-05416             | SS: 39    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-LFF            | SS: 60    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-LGF            | SS: 47    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-LLL            | SS: 64    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-LMF            | SS: 32    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-LRF            | SS: 46    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-NUR            | SS: 57    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-PHS            | SS: 24    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-PRIB           | SS: 56    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-30050             | SS: 12    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-60502             | SS: 19    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-60507             | SS: 3     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-60510             | SS: 12    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-60516             | SS: 12    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-60524             | SS: 8     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-60526             | SS: 2     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-62202             | SS: 10    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-62216             | SS: 9     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-62220             | SS: 14    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-68816             | SS: 5     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-87912             | SS: 18    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-90205             | SS: 1     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-90214             | SS: 1     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-90237             | SS: 3     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-90242             | SS: 5     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-90503             | SS: 1     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-90528             | SS: 5     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-98801             | SS: 15    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FI-31705             | SS: 1     | IP: 1          | ✅ MATCH     
+SKU: FI-31713             | SS: 4     | IP: 4          | ✅ MATCH     
+SKU: G-114203             | SS: 6     | IP: 6          | ✅ MATCH     
+SKU: G-12828              | SS: 109   | IP: 109        | ✅ MATCH     
+SKU: G-14079              | SS: 284   | IP: 284        | ✅ MATCH     
+SKU: G-19116              | SS: 297   | IP: 297        | ✅ MATCH     
+SKU: G-19955              | SS: 27    | IP: 27         | ✅ MATCH     
+SKU: G-220880             | SS: 2     | IP: 2          | ✅ MATCH     
+SKU: G-223242             | SS: 1     | IP: 1          | ✅ MATCH     
+SKU: G-22933              | SS: 2     | IP: 2          | ✅ MATCH     
+SKU: 49ERS-TATTOOS        | SS: 36    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: AMINCO-52523         | SS: 69    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: AMINCO-52525         | SS: 79    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: AMINCO-52526         | SS: 108   | IP: Not Found  | ❓ NOT_FOUND 
+SKU: AMINCO-52527         | SS: 96    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: BC-00890             | SS: 2     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: BEARS-"C"-TATTOOS    | SS: 59    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: CHIEFS-TATTOOS       | SS: 22    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: DOLPHOINS-TATTOOS    | SS: 25    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EW-02759             | SS: 3     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EW-02802             | SS: 4     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EW-02836             | SS: 52    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EW-05416             | SS: 39    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-LFF            | SS: 60    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-LGF            | SS: 47    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-LLL            | SS: 64    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-LMF            | SS: 32    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-LRF            | SS: 46    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-NUR            | SS: 57    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-PHS            | SS: 24    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-PRIB           | SS: 56    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-30050             | SS: 12    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-60502             | SS: 19    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-60507             | SS: 3     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-60510             | SS: 12    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-60516             | SS: 12    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-60524             | SS: 8     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-60526             | SS: 2     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-62202             | SS: 10    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-62216             | SS: 9     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-62220             | SS: 14    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-68816             | SS: 5     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-87912             | SS: 18    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-90205             | SS: 1     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-90214             | SS: 1     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-90237             | SS: 3     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-90242             | SS: 5     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-90503             | SS: 1     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-90528             | SS: 5     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-98801             | SS: 15    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FI-31705             | SS: 1     | IP: 1          | ✅ MATCH     
+SKU: FI-31713             | SS: 4     | IP: 4          | ✅ MATCH     
+SKU: G-114203             | SS: 6     | IP: 6          | ✅ MATCH     
+SKU: G-12828              | SS: 109   | IP: 109        | ✅ MATCH     
+SKU: G-14079              | SS: 284   | IP: 284        | ✅ MATCH     
+SKU: G-19116              | SS: 297   | IP: 297        | ✅ MATCH     
+SKU: G-19955              | SS: 27    | IP: 27         | ✅ MATCH     
+SKU: G-220880             | SS: 2     | IP: 2          | ✅ MATCH     
+SKU: G-223242             | SS: 1     | IP: 1          | ✅ MATCH     
+SKU: G-22933              | SS: 2     | IP: 2          | ✅ MATCH     
+SKU: 49ERS-TATTOOS        | SS: 36    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: AMINCO-52523         | SS: 69    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: AMINCO-52525         | SS: 79    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: AMINCO-52526         | SS: 108   | IP: Not Found  | ❓ NOT_FOUND 
+SKU: AMINCO-52527         | SS: 96    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: BC-00890             | SS: 2     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: BEARS-"C"-TATTOOS    | SS: 59    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: CHIEFS-TATTOOS       | SS: 22    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: DOLPHOINS-TATTOOS    | SS: 25    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EW-02759             | SS: 3     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EW-02802             | SS: 4     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EW-02836             | SS: 52    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EW-05416             | SS: 39    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-LFF            | SS: 60    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-LGF            | SS: 47    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-LLL            | SS: 64    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-LMF            | SS: 32    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-LRF            | SS: 46    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-NUR            | SS: 57    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-PHS            | SS: 24    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-PRIB           | SS: 56    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-30050             | SS: 12    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-60502             | SS: 19    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-60507             | SS: 3     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-60510             | SS: 12    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-60516             | SS: 12    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-60524             | SS: 8     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-60526             | SS: 2     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-62202             | SS: 10    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-62216             | SS: 9     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-62220             | SS: 14    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-68816             | SS: 5     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-87912             | SS: 18    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-90205             | SS: 1     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-90214             | SS: 1     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-90237             | SS: 3     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-90242             | SS: 5     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-90503             | SS: 1     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-90528             | SS: 5     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-98801             | SS: 15    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FI-31705             | SS: 1     | IP: 1          | ✅ MATCH     
+SKU: FI-31713             | SS: 4     | IP: 4          | ✅ MATCH     
+SKU: G-114203             | SS: 6     | IP: 6          | ✅ MATCH     
+SKU: G-12828              | SS: 109   | IP: 109        | ✅ MATCH     
+SKU: G-14079              | SS: 284   | IP: 284        | ✅ MATCH     
+SKU: G-19116              | SS: 297   | IP: 297        | ✅ MATCH     
+SKU: G-19955              | SS: 27    | IP: 27         | ✅ MATCH     
+SKU: G-220880             | SS: 2     | IP: 2          | ✅ MATCH     
+SKU: G-223242             | SS: 1     | IP: 1          | ✅ MATCH     
+SKU: G-22933              | SS: 2     | IP: 2          | ✅ MATCH     
+SKU: 49ERS-TATTOOS        | SS: 36    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: AMINCO-52523         | SS: 69    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: AMINCO-52525         | SS: 79    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: AMINCO-52526         | SS: 108   | IP: Not Found  | ❓ NOT_FOUND 
+SKU: AMINCO-52527         | SS: 96    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: BC-00890             | SS: 2     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: BEARS-"C"-TATTOOS    | SS: 59    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: CHIEFS-TATTOOS       | SS: 22    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: DOLPHOINS-TATTOOS    | SS: 25    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EW-02759             | SS: 3     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EW-02802             | SS: 4     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EW-02836             | SS: 52    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EW-05416             | SS: 39    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-LFF            | SS: 60    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-LGF            | SS: 47    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-LLL            | SS: 64    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-LMF            | SS: 32    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-LRF            | SS: 46    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-NUR            | SS: 57    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-PHS            | SS: 24    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-PRIB           | SS: 56    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-30050             | SS: 12    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-60502             | SS: 19    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-60507             | SS: 3     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-60510             | SS: 12    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-60516             | SS: 12    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-60524             | SS: 8     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-60526             | SS: 2     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-62202             | SS: 10    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-62216             | SS: 9     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-62220             | SS: 14    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-68816             | SS: 5     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-87912             | SS: 18    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-90205             | SS: 1     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-90214             | SS: 1     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-90237             | SS: 3     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-90242             | SS: 5     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-90503             | SS: 1     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-90528             | SS: 5     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-98801             | SS: 15    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FI-31705             | SS: 1     | IP: 1          | ✅ MATCH     
+SKU: FI-31713             | SS: 4     | IP: 4          | ✅ MATCH     
+SKU: G-114203             | SS: 6     | IP: 6          | ✅ MATCH     
+SKU: G-12828              | SS: 109   | IP: 109        | ✅ MATCH     
+SKU: G-14079              | SS: 284   | IP: 284        | ✅ MATCH     
+SKU: G-19116              | SS: 297   | IP: 297        | ✅ MATCH     
+SKU: G-19955              | SS: 27    | IP: 27         | ✅ MATCH     
+SKU: G-220880             | SS: 2     | IP: 2          | ✅ MATCH     
+SKU: G-223242             | SS: 1     | IP: 1          | ✅ MATCH     
+SKU: G-22933              | SS: 2     | IP: 2          | ✅ MATCH     
+SKU: 49ERS-TATTOOS        | SS: 36    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: AMINCO-52523         | SS: 69    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: AMINCO-52525         | SS: 79    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: AMINCO-52526         | SS: 108   | IP: Not Found  | ❓ NOT_FOUND 
+SKU: AMINCO-52527         | SS: 96    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: BC-00890             | SS: 2     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: BEARS-"C"-TATTOOS    | SS: 59    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: CHIEFS-TATTOOS       | SS: 22    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: DOLPHOINS-TATTOOS    | SS: 25    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EW-02759             | SS: 3     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EW-02802             | SS: 4     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EW-02836             | SS: 52    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EW-05416             | SS: 39    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-LFF            | SS: 60    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-LGF            | SS: 47    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-LLL            | SS: 64    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-LMF            | SS: 32    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-LRF            | SS: 46    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-NUR            | SS: 57    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-PHS            | SS: 24    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: EXPBR-PRIB           | SS: 56    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-30050             | SS: 12    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-60502             | SS: 19    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-60507             | SS: 3     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-60510             | SS: 12    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-60516             | SS: 12    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-60524             | SS: 8     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-60526             | SS: 2     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-62202             | SS: 10    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-62216             | SS: 9     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-62220             | SS: 14    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-68816             | SS: 5     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-87912             | SS: 18    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-90205             | SS: 1     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-90214             | SS: 1     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-90237             | SS: 3     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-90242             | SS: 5     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-90503             | SS: 1     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-90528             | SS: 5     | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FD-98801             | SS: 15    | IP: Not Found  | ❓ NOT_FOUND 
+SKU: FI-31705             | SS: 1     | IP: 1          | ✅ MATCH     
+SKU: FI-31713             | SS: 4     | IP: 4          | ✅ MATCH     
+SKU: G-114203             | SS: 6     | IP: 6          | ✅ MATCH     
+SKU: G-12828              | SS: 109   | IP: 109        | ✅ MATCH     
+SKU: G-14079              | SS: 284   | IP: 284        | ✅ MATCH     
+SKU: G-19116              | SS: 297   | IP: 297        | ✅ MATCH     
+SKU: G-19955              | SS: 27    | IP: 27         | ✅ MATCH     
+SKU: G-220880             | SS: 2     | IP: 2          | ✅ MATCH     
+SKU: G-223242             | SS: 1     | IP: 1          | ✅ MATCH     
+SKU: G-22933              | SS: 2     | IP: 2          | ✅ MATCH     
+--------------------------------------------------------------------------------
+📈 Sync Summary:
+  ✅ Successful: 0
+  ❌ Failed: 0
+2025-07-26 15:33:55 - root - ERROR - Unexpected error occurred
+Traceback (most recent call last):
+  File "/Users/troyfortin/GitHub/shipstation_infiplex_inventory_sync/src/inventory_sync/cli.py", line 394, in bulk_sync
+    click.echo(f"  📦 Total: {len(response.inventory)}")
+                                  ^^^^^^^^
+UnboundLocalError: cannot access local variable 'response' where it is not associated with a value
+Unexpected error: cannot access local variable 'response' where it is not associated with a value
