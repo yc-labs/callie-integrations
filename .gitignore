@@ -54,7 +54,7 @@ ipython_config.py
 .python-version
 
 # Poetry
-poetry.lock
+# poetry.lock  # Keep poetry.lock for reproducible builds
 
 # Environment variables
 .env
