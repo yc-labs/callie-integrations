@@ -1,0 +1,128 @@
+{
+  "id": "shipstation-to-infiplex-inventory-sync",
+  "name": "ShipStation to InfiPlex Inventory Sync (Stage-Based)",
+  "description": "Production stage-based sync that gets InfiPlex SKUs, queries ShipStation for each, handles zero inventory, and bulk updates InfiPlex",
+  "source": {
+    "service_type": "shipstation",
+    "credentials": {
+      "api_key": "${SHIPSTATION_API_KEY}"
+    },
+    "base_url": "https://api.shipstation.com"
+  },
+  "target": {
+    "service_type": "infiplex",
+    "credentials": {
+      "api_key": "${INFIPLEX_API_KEY}"
+    },
+    "base_url": "${INFIPLEX_BASE_URL}",
+    "warehouse_id": 17
+  },
+  "field_mappings": {
+    "sku": "sku",
+    "available": "quantity_to_set"
+  },
+  "sync_options": {
+    "warehouse_id": 17
+  },
+  "stages": [
+    {
+      "id": "get_target_skus",
+      "type": "get_target_skus",
+      "description": "Get all SKUs from InfiPlex inventory that need to be synced",
+      "connector": "target",
+      "operation": "read_inventory",
+      "parameters": {},
+      "filters": {},
+      "output_variable": "target_skus",
+      "on_error": "fail",
+      "depends_on": []
+    },
+    {
+      "id": "get_source_inventory",
+      "type": "get_source_inventory",
+      "description": "Get inventory data from ShipStation for each target SKU individually",
+      "connector": "source",
+      "operation": "read_inventory",
+      "parameters": {},
+      "filters": {},
+      "output_variable": "source_inventory_raw",
+      "depends_on": ["get_target_skus"],
+      "on_error": "continue"
+    },
+    {
+      "id": "find_missing_skus",
+      "type": "custom",
+      "description": "Identify SKUs that had no inventory data from ShipStation",
+      "connector": "source",
+      "operation": "_find_missing_skus",
+      "parameters": {},
+      "filters": {},
+      "output_variable": "missing_skus",
+      "depends_on": ["get_source_inventory"],
+      "on_error": "continue"
+    },
+    {
+      "id": "check_products_exist",
+      "type": "check_product_exists",
+      "description": "Check if missing SKUs exist as active products in ShipStation (for zero inventory)",
+      "connector": "source",
+      "operation": "read_products",
+      "parameters": {},
+      "filters": {},
+      "output_variable": "zero_inventory_items",
+      "depends_on": ["find_missing_skus"],
+      "on_error": "continue"
+    },
+    {
+      "id": "combine_inventory_data",
+      "type": "custom",
+      "description": "Combine actual inventory data with zero inventory items",
+      "connector": "source",
+      "operation": "_combine_inventory_data",
+      "parameters": {},
+      "filters": {},
+      "output_variable": "combined_inventory",
+      "depends_on": ["get_source_inventory", "check_products_exist"],
+      "on_error": "fail"
+    },
+    {
+      "id": "transform_data",
+      "type": "transform_data",
+      "description": "Transform ShipStation inventory data to InfiPlex bulk update format",
+      "connector": "target",
+      "operation": "transform",
+      "parameters": {
+        "field_mappings": {
+          "sku": "sku",
+          "available": "quantity_to_set"
+        },
+        "defaults": {
+          "warehouse_id": 17
+        }
+      },
+      "filters": {},
+      "output_variable": "transformed_data",
+      "depends_on": ["combine_inventory_data"],
+      "on_error": "fail"
+    },
+    {
+      "id": "write_to_target",
+      "type": "write_to_target",
+      "description": "Bulk update inventory quantities in InfiPlex",
+      "connector": "target",
+      "operation": "write_inventory",
+      "parameters": {},
+      "filters": {},
+      "depends_on": ["transform_data"],
+      "on_error": "fail"
+    }
+  ],
+  "timeout_seconds": 3600,
+  "retry_policy": {
+    "max_retries": 3,
+    "backoff_factor": 2
+  },
+  "created_at": "2025-01-27T03:00:00Z",
+  "updated_at": "2025-01-27T03:00:00Z",
+  "is_active": true
+} 
