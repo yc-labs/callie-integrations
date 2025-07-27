@@ -8,7 +8,7 @@ REPOSITORY="callie-integrations"
 SERVICE_NAME="callie-api"
 
 # Get version from version.py
-VERSION=$(python -c "from src.callie.version import get_docker_tag; print(get_docker_tag())")
+VERSION=$(python3 -c "from src.callie.version import get_docker_tag; print(get_docker_tag())")
 COMMIT_SHA=$(git rev-parse --short HEAD)
 
 echo "🏗️  Building Callie API Docker image..."
