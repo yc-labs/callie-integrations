@@ -109,7 +109,7 @@ class SyncEngine:
         config: SyncConfig
     ) -> List[SyncResult]:
         """
-        Execute inventory synchronization.
+        Execute inventory synchronization using targeted approach.
         
         Args:
             source_data: Original data from source
@@ -123,15 +123,7 @@ class SyncEngine:
         results = []
         items_to_write = []
         
-        # Read existing target data for comparison
-        try:
-            target_data = target_connector.read_inventory()
-            target_by_sku = {item.get("sku"): item for item in target_data if item.get("sku")}
-        except Exception as e:
-            logger.warning(f"Could not read target data for comparison: {e}")
-            target_by_sku = {}
-        
-        # Process each item
+        # Process each item with targeted queries to the target system
         for i, (source_item, transformed_item) in enumerate(zip(source_data, transformed_data)):
             sku = source_item.get("sku")
             if not sku:
@@ -142,17 +134,43 @@ class SyncEngine:
                 ))
                 continue
             
-            # Check current target value
-            target_item = target_by_sku.get(sku)
-            current_target_value = None
-            if target_item:
-                # Find the target field name for comparison
-                quantity_field = self._get_target_quantity_field(config)
-                current_target_value = target_item.get(quantity_field)
+            # Query target system for this specific SKU
+            try:
+                target_data = target_connector.read_inventory(sku=sku)
+                target_item = target_data[0] if target_data else None
+            except Exception as e:
+                logger.warning(f"Could not query target for SKU {sku}: {e}")
+                # If we can't query the target, add to write list anyway
+                items_to_write.append(transformed_item)
+                results.append(SyncResult(
+                    sku=sku,
+                    status=SyncItemStatus.SUCCESS,
+                    source_value=source_item.get("available"),
+                    target_value=None,
+                    new_value=transformed_item.get("quantity_to_set"),
+                    message="Target query failed, will attempt update"
+                ))
+                continue
             
-            # Get new value that would be set
+            # Check if SKU was found in target
+            if not target_item:
+                logger.info(f"SKU {sku} not found in ShipStation inventory.")
+                # SKU doesn't exist in target system - skip it
+                results.append(SyncResult(
+                    sku=sku,
+                    status=SyncItemStatus.SKIPPED,
+                    source_value=source_item.get("available"),
+                    target_value=None,
+                    new_value=transformed_item.get("quantity_to_set"),
+                    message="SKU not found in target system"
+                ))
+                continue
+            
+            # Get current and new values for comparison
+            quantity_field = self._get_target_quantity_field(config)
+            current_target_value = target_item.get(quantity_field)
             new_value = transformed_item.get("quantity_to_set")
-            source_value = source_item.get("available")  # Assuming we sync available quantity
+            source_value = source_item.get("available")
             
             # Determine if sync is needed
             if current_target_value is not None:
