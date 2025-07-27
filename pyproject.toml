@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "callie-integrations"
-version = "1.0.0"
+version = "2.0.0"
 description = "Enterprise data synchronization platform for Calibrate Network"
 authors = ["Calibrate Network <dev@calibratenetwork.com>"]
 readme = "README.md"
@@ -16,6 +16,7 @@ fastapi = "^0.115.6"
 uvicorn = "^0.34.0"
 google-cloud-firestore = "^2.20.0"
 google-cloud-scheduler = "^2.14.0"
+google-cloud-secret-manager = "^2.21.1"
 google-auth = "^2.36.0"
 
 [tool.poetry.group.dev.dependencies]

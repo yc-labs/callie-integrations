@@ -147,4 +147,19 @@ class WorkflowExecution(BaseModel):
     
     # Trigger info
     triggered_by: str = Field("manual")
-    metadata: Dict[str, Any] = Field(default_factory=dict) 
+    metadata: Dict[str, Any] = Field(default_factory=dict)
+
+
+class WorkflowUpdate(BaseModel):
+    """Updatable fields for a workflow."""
+    name: Optional[str] = None
+    description: Optional[str] = None
+    version: Optional[str] = None
+    source: Optional[Dict[str, Any]] = None
+    target: Optional[Dict[str, Any]] = None
+    stages: Optional[List[StageConfig]] = None
+    variables: Optional[Dict[str, Any]] = None
+    timeout_seconds: Optional[int] = None
+    schedule: Optional[str] = None
+    active: Optional[bool] = None
+    created_by: Optional[str] = None 

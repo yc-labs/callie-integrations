@@ -11,35 +11,42 @@ from fastapi import FastAPI, HTTPException, Depends, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
-from ..models.config import SyncConfig, ServiceConnection, FieldMapping
-from ..models.sync import SyncExecution, SyncStatus
-from ..models.stages import WorkflowConfig, WorkflowExecution
+from ..models.stages import WorkflowConfig, WorkflowExecution, WorkflowUpdate
 from ..services.firestore import FirestoreService
 from ..services.scheduler import SchedulerService
-from ..engine.sync import SyncEngine
+from ..services.secrets import SecretManagerService
 from ..engine.workflow_engine import WorkflowEngine
 from ..connectors import CONNECTOR_REGISTRY
 from ..version import __version__
+from ..exceptions import CallieException, ConfigurationError
 
 logger = logging.getLogger(__name__)
 
 # Global services (initialized in lifespan)
 firestore_service: Optional[FirestoreService] = None
 scheduler_service: Optional[SchedulerService] = None
-sync_engine: Optional[SyncEngine] = None
+secret_service: Optional[SecretManagerService] = None
 workflow_engine: Optional[WorkflowEngine] = None
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Application lifespan manager."""
-    global firestore_service, scheduler_service, sync_engine, workflow_engine
+    global firestore_service, scheduler_service, secret_service, workflow_engine
     
     # Initialize services
     project_id = os.getenv("GOOGLE_CLOUD_PROJECT")
     region = os.getenv("GOOGLE_CLOUD_REGION", "us-central1")
     
     try:
+        # Initialize Secret Manager service
+        try:
+            secret_service = SecretManagerService(project_id=project_id)
+            logger.info("Secret Manager service initialized successfully")
+        except Exception as e:
+            logger.error(f"Failed to initialize Secret Manager service: {e}")
+            secret_service = None
+        
         # Initialize Firestore service
         try:
             firestore_service = FirestoreService(project_id=project_id)
@@ -55,10 +62,6 @@ async def lifespan(app: FastAPI):
         except Exception as e:
             logger.error(f"Failed to initialize Scheduler service: {e}")
             scheduler_service = None
-        
-        # Initialize Sync Engine
-        sync_engine = SyncEngine()
-        logger.info("Sync engine initialized successfully")
         
         # Initialize Workflow Engine
         workflow_engine = WorkflowEngine()
@@ -83,10 +86,17 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# Add CORS middleware
+# Get allowed origins from environment variable
+allowed_origins_str = os.getenv("ALLOWED_ORIGINS", "")
+allowed_origins = [origin.strip() for origin in allowed_origins_str.split(",") if origin.strip()]
+
+if not allowed_origins:
+    # Default to allowing all for local dev if not set
+    allowed_origins = ["*"]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Configure appropriately for production
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -103,10 +113,9 @@ def get_scheduler_service() -> SchedulerService:
         raise HTTPException(status_code=500, detail="Scheduler service not initialized")
     return scheduler_service
 
-def get_sync_engine() -> SyncEngine:
-    if sync_engine is None:
-        raise HTTPException(status_code=500, detail="Sync engine not initialized")
-    return sync_engine
+def get_secret_service() -> Optional[SecretManagerService]:
+    """Get Secret Manager service if available, otherwise return None."""
+    return secret_service
 
 def get_workflow_engine() -> WorkflowEngine:
     if workflow_engine is None:
@@ -114,249 +123,39 @@ def get_workflow_engine() -> WorkflowEngine:
     return workflow_engine
 
 
-# Request/Response models
-class CreateConfigRequest(BaseModel):
-    name: str = Field(..., description="Human-readable name")
-    description: Optional[str] = Field(None, description="Optional description")
-    source: ServiceConnection = Field(..., description="Source service configuration")
-    target: ServiceConnection = Field(..., description="Target service configuration")
-    field_mappings: List[FieldMapping] = Field(..., description="Field mappings")
-    schedule: Optional[str] = Field(None, description="Cron expression for scheduling")
-    sync_options: Dict[str, Any] = Field(default_factory=dict, description="Sync options")
-    active: bool = Field(True, description="Whether config is active")
+def inject_credentials_into_workflow(workflow: WorkflowConfig, credentials: Dict[str, str]) -> WorkflowConfig:
+    """Inject real API credentials into workflow configuration."""
+    import json
+    
+    # Convert workflow to JSON string
+    workflow_json = workflow.model_dump_json()
+    
+    # Replace ${VAR_NAME} patterns with actual credential values
+    for var_name, var_value in credentials.items():
+        placeholder = f"${{{var_name}}}"
+        workflow_json = workflow_json.replace(placeholder, var_value)
+    
+    # Convert back to WorkflowConfig
+    workflow_dict = json.loads(workflow_json)
+    return WorkflowConfig(**workflow_dict)
 
 
-class UpdateConfigRequest(BaseModel):
-    name: Optional[str] = Field(None, description="Human-readable name")
-    description: Optional[str] = Field(None, description="Optional description")
-    source: Optional[ServiceConnection] = Field(None, description="Source service configuration")
-    target: Optional[ServiceConnection] = Field(None, description="Target service configuration")
-    field_mappings: Optional[List[FieldMapping]] = Field(None, description="Field mappings")
-    schedule: Optional[str] = Field(None, description="Cron expression for scheduling")
-    sync_options: Optional[Dict[str, Any]] = Field(None, description="Sync options")
-    active: Optional[bool] = Field(None, description="Whether config is active")
-
-
-class SyncTriggerRequest(BaseModel):
-    triggered_by: str = Field(..., description="Who/what triggered this sync")
+# Request/Response models - These can be removed if they are no longer needed
 
 
 # Health check endpoint
 @app.get("/health")
 async def health_check():
-    """Health check endpoint."""
+    """Check the health of the application and its services."""
     return {
         "status": "healthy",
         "services": {
             "firestore": firestore_service is not None,
             "scheduler": scheduler_service is not None,
-            "sync_engine": sync_engine is not None
+            "secret_manager": secret_service is not None,
+            "workflow_engine": workflow_engine is not None,
         }
     }
-
-
-# Configuration management endpoints
-@app.post("/api/v1/configs", response_model=SyncConfig)
-async def create_config(
-    request: CreateConfigRequest,
-    fs: FirestoreService = Depends(get_firestore_service)
-):
-    """Create a new sync configuration."""
-    try:
-        config = SyncConfig(
-            name=request.name,
-            description=request.description,
-            source=request.source,
-            target=request.target,
-            field_mappings=request.field_mappings,
-            schedule=request.schedule,
-            sync_options=request.sync_options,
-            active=request.active
-        )
-        
-        created_config = fs.create_config(config)
-        return created_config
-        
-    except Exception as e:
-        logger.error(f"Failed to create config: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@app.get("/api/v1/configs", response_model=List[SyncConfig])
-async def list_configs(
-    fs: FirestoreService = Depends(get_firestore_service)
-):
-    """List all sync configurations."""
-    try:
-        configs = fs.list_configs()
-        return configs
-    except Exception as e:
-        logger.error(f"Failed to list configs: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@app.get("/api/v1/configs/{config_id}", response_model=SyncConfig)
-async def get_config(
-    config_id: str,
-    fs: FirestoreService = Depends(get_firestore_service)
-):
-    """Get a specific sync configuration."""
-    try:
-        config = fs.get_config(config_id)
-        if config is None:
-            raise HTTPException(status_code=404, detail="Configuration not found")
-        return config
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Failed to get config {config_id}: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@app.put("/api/v1/configs/{config_id}", response_model=SyncConfig)
-async def update_config(
-    config_id: str,
-    request: UpdateConfigRequest,
-    fs: FirestoreService = Depends(get_firestore_service)
-):
-    """Update an existing sync configuration."""
-    try:
-        # Get existing config
-        existing_config = fs.get_config(config_id)
-        if existing_config is None:
-            raise HTTPException(status_code=404, detail="Configuration not found")
-        
-        # Update only provided fields
-        update_data = {}
-        if request.name is not None:
-            update_data["name"] = request.name
-        if request.description is not None:
-            update_data["description"] = request.description
-        if request.source is not None:
-            update_data["source"] = request.source
-        if request.target is not None:
-            update_data["target"] = request.target
-        if request.field_mappings is not None:
-            update_data["field_mappings"] = request.field_mappings
-        if request.schedule is not None:
-            update_data["schedule"] = request.schedule
-        if request.sync_options is not None:
-            update_data["sync_options"] = request.sync_options
-        if request.active is not None:
-            update_data["active"] = request.active
-        
-        updated_config = fs.update_config(config_id, update_data)
-        return updated_config
-        
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Failed to update config {config_id}: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@app.delete("/api/v1/configs/{config_id}")
-async def delete_config(
-    config_id: str,
-    fs: FirestoreService = Depends(get_firestore_service)
-):
-    """Delete a sync configuration."""
-    try:
-        success = fs.delete_config(config_id)
-        if not success:
-            raise HTTPException(status_code=404, detail="Configuration not found")
-        return {"message": "Configuration deleted successfully"}
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Failed to delete config {config_id}: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-# Sync execution endpoints
-@app.post("/api/v1/configs/{config_id}/sync", response_model=SyncExecution)
-async def execute_sync(
-    config_id: str,
-    request: SyncTriggerRequest,
-    background_tasks: BackgroundTasks,
-    fs: FirestoreService = Depends(get_firestore_service),
-    engine: SyncEngine = Depends(get_sync_engine)
-):
-    """Execute a sync operation."""
-    try:
-        # Get config
-        config = fs.get_config(config_id)
-        if not config:
-            raise HTTPException(status_code=404, detail="Configuration not found")
-        
-        if not config.active:
-            raise HTTPException(status_code=400, detail="Configuration is not active")
-        
-        # Execute sync in background
-        def run_sync():
-            try:
-                execution = engine.execute_sync(config, triggered_by=request.triggered_by)
-                
-                # Save execution result
-                fs.create_execution(execution)
-                
-            except Exception as e:
-                logger.error(f"Background sync failed: {e}")
-        
-        background_tasks.add_task(run_sync)
-        
-        # Return immediately with a placeholder execution
-        from ..models.sync import SyncExecution
-        import time
-        
-        execution = SyncExecution(
-            id=f"sync_{config_id}_{int(time.time())}",
-            config_id=config_id,
-            status=SyncStatus.RUNNING,
-            triggered_by=request.triggered_by,
-            started_at=datetime.utcnow()
-        )
-        
-        return execution
-        
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Failed to execute sync for config {config_id}: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@app.get("/api/v1/configs/{config_id}/executions", response_model=List[SyncExecution])
-async def list_executions(
-    config_id: str,
-    limit: int = 50,
-    fs: FirestoreService = Depends(get_firestore_service)
-):
-    """List sync executions for a configuration."""
-    try:
-        executions = fs.list_executions(config_id, limit=limit)
-        return executions
-    except Exception as e:
-        logger.error(f"Failed to list executions for config {config_id}: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@app.get("/api/v1/executions/{execution_id}", response_model=SyncExecution)
-async def get_execution(
-    execution_id: str,
-    fs: FirestoreService = Depends(get_firestore_service)
-):
-    """Get a specific sync execution."""
-    try:
-        execution = fs.get_execution(execution_id)
-        if execution is None:
-            raise HTTPException(status_code=404, detail="Execution not found")
-        return execution
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Failed to get execution {execution_id}: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
 
 
 # Connector information endpoints
@@ -375,38 +174,41 @@ async def list_connectors():
     }
 
 
-# Schedule management endpoints
-@app.post("/api/v1/configs/{config_id}/schedule")
-async def create_schedule(
-    config_id: str,
+# Schedule management endpoints are now tied to workflows
+@app.post("/api/v1/workflows/{workflow_id}/schedule")
+async def create_schedule_for_workflow(
+    workflow_id: str,
     scheduler: SchedulerService = Depends(get_scheduler_service),
     fs: FirestoreService = Depends(get_firestore_service)
 ):
-    """Create a Cloud Scheduler job for a sync configuration."""
+    """Create a Cloud Scheduler job for a workflow."""
     try:
-        config = fs.get_config(config_id)
-        if not config:
-            raise HTTPException(status_code=404, detail="Configuration not found")
+        workflow = fs.get_workflow(workflow_id)
+        if not workflow:
+            raise HTTPException(status_code=404, detail="Workflow not found")
+
+        if not workflow.schedule:
+            raise HTTPException(status_code=400, detail="Workflow does not have a schedule")
+
+        job_name = f"workflow-{workflow_id}"
         
-        if not config.schedule:
-            raise HTTPException(status_code=400, detail="Configuration does not have a schedule")
-        
-        job_name = f"sync-{config_id}"
-        target_url = f"https://your-api-url/api/v1/configs/{config_id}/sync"
-        
+        # Get base URL from environment variable, with a default for local dev
+        base_url = os.getenv("API_BASE_URL", "http://localhost:8000")
+        target_url = f"{base_url}/api/v1/workflows/{workflow_id}/execute"
+
         result = scheduler.create_job(
             job_name=job_name,
-            schedule=config.schedule,
+            schedule=workflow.schedule,
             target_url=target_url,
             payload={"triggered_by": "scheduler"}
         )
-        
+
         return {"message": "Schedule created successfully", "job_name": job_name}
-        
+
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Failed to create schedule for config {config_id}: {e}")
+        logger.error(f"Failed to create schedule for workflow {workflow_id}: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -422,9 +224,12 @@ async def create_workflow(
     """Create a new configurable workflow."""
     try:
         return firestore.create_workflow(workflow)
-    except Exception as e:
+    except CallieException as e:
         logger.error(f"Failed to create workflow: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        logger.error(f"An unexpected error occurred during workflow creation: {e}")
+        raise HTTPException(status_code=500, detail="An unexpected error occurred.")
 
 
 @app.get("/api/v1/workflows", response_model=List[WorkflowConfig])
@@ -435,9 +240,12 @@ async def list_workflows(
     """List all workflows."""
     try:
         return firestore.list_workflows(active_only=active_only)
-    except Exception as e:
+    except CallieException as e:
         logger.error(f"Failed to list workflows: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+    except Exception as e:
+        logger.error(f"An unexpected error occurred while listing workflows: {e}")
+        raise HTTPException(status_code=500, detail="An unexpected error occurred.")
 
 
 @app.get("/api/v1/workflows/{workflow_id}", response_model=WorkflowConfig)
@@ -449,32 +257,45 @@ async def get_workflow(
     try:
         workflow = firestore.get_workflow(workflow_id)
         if workflow is None:
-            raise HTTPException(status_code=404, detail=f"Workflow {workflow_id} not found")
+            raise ConfigurationError(f"Workflow {workflow_id} not found")
         return workflow
-    except HTTPException:
-        raise
-    except Exception as e:
+    except ConfigurationError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except CallieException as e:
         logger.error(f"Failed to get workflow {workflow_id}: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+    except Exception as e:
+        logger.error(f"An unexpected error occurred while getting workflow {workflow_id}: {e}")
+        raise HTTPException(status_code=500, detail="An unexpected error occurred.")
 
 
 @app.put("/api/v1/workflows/{workflow_id}", response_model=WorkflowConfig)
 async def update_workflow(
     workflow_id: str,
-    updates: Dict[str, Any],
+    updates: WorkflowUpdate,
     firestore: FirestoreService = Depends(get_firestore_service)
 ):
     """Update a workflow configuration."""
     try:
-        workflow = firestore.update_workflow(workflow_id, updates)
+        update_data = updates.model_dump(exclude_unset=True)
+        if not update_data:
+            raise HTTPException(
+                status_code=400,
+                detail="No update data provided. At least one field must be specified."
+            )
+
+        workflow = firestore.update_workflow(workflow_id, update_data)
         if workflow is None:
-            raise HTTPException(status_code=404, detail=f"Workflow {workflow_id} not found")
+            raise ConfigurationError(f"Workflow {workflow_id} not found")
         return workflow
-    except HTTPException:
-        raise
-    except Exception as e:
+    except ConfigurationError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except CallieException as e:
         logger.error(f"Failed to update workflow {workflow_id}: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+    except Exception as e:
+        logger.error(f"An unexpected error occurred while updating workflow {workflow_id}: {e}")
+        raise HTTPException(status_code=500, detail="An unexpected error occurred.")
 
 
 @app.delete("/api/v1/workflows/{workflow_id}")
@@ -486,45 +307,143 @@ async def delete_workflow(
     try:
         success = firestore.delete_workflow(workflow_id)
         if not success:
-            raise HTTPException(status_code=404, detail=f"Workflow {workflow_id} not found")
+            raise ConfigurationError(f"Workflow {workflow_id} not found")
         return {"message": f"Workflow {workflow_id} deleted successfully"}
-    except HTTPException:
-        raise
-    except Exception as e:
+    except ConfigurationError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except CallieException as e:
         logger.error(f"Failed to delete workflow {workflow_id}: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+    except Exception as e:
+        logger.error(f"An unexpected error occurred while deleting workflow {workflow_id}: {e}")
+        raise HTTPException(status_code=500, detail="An unexpected error occurred.")
 
 
-@app.post("/api/v1/workflows/{workflow_id}/execute", response_model=WorkflowExecution)
-async def execute_workflow(
+@app.post("/api/v1/workflows/{workflow_id}/execute-sync")
+async def execute_workflow_sync(
     workflow_id: str,
-    background_tasks: BackgroundTasks,
     firestore: FirestoreService = Depends(get_firestore_service),
-    workflow_engine: WorkflowEngine = Depends(get_workflow_engine)
+    workflow_engine: WorkflowEngine = Depends(get_workflow_engine),
+    secret_service: Optional[SecretManagerService] = Depends(get_secret_service)
 ):
-    """Execute a configurable workflow."""
+    """Execute a workflow synchronously for testing."""
     try:
         # Get workflow configuration
         workflow = firestore.get_workflow(workflow_id)
         if workflow is None:
-            raise HTTPException(status_code=404, detail=f"Workflow {workflow_id} not found")
+            raise ConfigurationError(f"Workflow {workflow_id} not found")
         
         if not workflow.active:
-            raise HTTPException(status_code=400, detail=f"Workflow {workflow_id} is not active")
+            raise ConfigurationError(f"Workflow {workflow_id} is not active")
         
-        # Execute workflow
-        execution = workflow_engine.execute_workflow(workflow, triggered_by="manual")
+        # Get API credentials from Secret Manager or environment variables
+        credentials = {}
+        if secret_service:
+            try:
+                credentials = secret_service.get_api_credentials()
+                logger.info(f"Retrieved credentials from Secret Manager: {list(credentials.keys())}")
+            except Exception as e:
+                logger.error(f"Failed to get credentials from Secret Manager: {e}")
         
-        # Store execution result
-        firestore.create_workflow_execution(execution)
+        # Fall back to environment variables if no secret service or secret retrieval failed
+        if not credentials:
+            logger.info("Using environment variables for credentials")
+            credentials = {
+                "SHIPSTATION_API_KEY": os.getenv("SHIPSTATION_API_KEY", ""),
+                "SHIPSTATION_BASE_URL": os.getenv("SHIPSTATION_BASE_URL", "https://api.shipstation.com"),
+                "INFIPLEX_API_KEY": os.getenv("INFIPLEX_API_KEY", ""),
+                "INFIPLEX_BASE_URL": os.getenv("INFIPLEX_BASE_URL", ""),
+                "API_BASE_URL": os.getenv("API_BASE_URL", "http://localhost:8000"),
+            }
+        
+        # Inject credentials into workflow
+        workflow_with_credentials = inject_credentials_into_workflow(workflow, credentials)
+        logger.info(f"Injected credentials into workflow")
+        
+        # Execute workflow synchronously
+        execution = workflow_engine.execute_workflow(workflow_with_credentials, triggered_by="manual-sync")
         
         return execution
         
-    except HTTPException:
-        raise
-    except Exception as e:
+    except ConfigurationError as e:
+        logger.error(f"Configuration error executing workflow {workflow_id}: {e}")
+        raise HTTPException(status_code=400, detail=str(e))
+    except CallieException as e:
         logger.error(f"Failed to execute workflow {workflow_id}: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+    except Exception as e:
+        logger.error(f"An unexpected error occurred during workflow execution {workflow_id}: {e}")
+        raise HTTPException(status_code=500, detail="An unexpected error occurred.")
+
+
+@app.post("/api/v1/workflows/{workflow_id}/execute", status_code=202)
+async def execute_workflow(
+    workflow_id: str,
+    background_tasks: BackgroundTasks,
+    firestore: FirestoreService = Depends(get_firestore_service),
+    workflow_engine: WorkflowEngine = Depends(get_workflow_engine),
+    secret_service: Optional[SecretManagerService] = Depends(get_secret_service)
+):
+    """
+    Execute a configurable workflow in the background.
+    Returns a task ID that can be used to monitor the execution.
+    """
+    try:
+        # Get workflow configuration
+        workflow = firestore.get_workflow(workflow_id)
+        if workflow is None:
+            raise ConfigurationError(f"Workflow {workflow_id} not found")
+        
+        if not workflow.active:
+            raise ConfigurationError(f"Workflow {workflow_id} is not active")
+        
+        # Define the background task
+        def run_workflow():
+            try:
+                # Get API credentials from Secret Manager or environment variables
+                credentials = {}
+                if secret_service:
+                    try:
+                        credentials = secret_service.get_api_credentials()
+                    except Exception as e:
+                        logger.error(f"Failed to get credentials from Secret Manager: {e}")
+                
+                # Fall back to environment variables if no secret service or secret retrieval failed
+                if not credentials:
+                    credentials = {
+                        "SHIPSTATION_API_KEY": os.getenv("SHIPSTATION_API_KEY", ""),
+                        "SHIPSTATION_BASE_URL": os.getenv("SHIPSTATION_BASE_URL", "https://api.shipstation.com"),
+                        "INFIPLEX_API_KEY": os.getenv("INFIPLEX_API_KEY", ""),
+                        "INFIPLEX_BASE_URL": os.getenv("INFIPLEX_BASE_URL", ""),
+                        "API_BASE_URL": os.getenv("API_BASE_URL", "http://localhost:8000"),
+                    }
+                
+                # Inject credentials into workflow
+                workflow_with_credentials = inject_credentials_into_workflow(workflow, credentials)
+                
+                execution = workflow_engine.execute_workflow(workflow_with_credentials, triggered_by="manual")
+                firestore.create_workflow_execution(execution)
+            except Exception as e:
+                logger.error(f"Background workflow execution for {workflow_id} failed: {e}")
+
+        # Add task to background
+        background_tasks.add_task(run_workflow)
+        
+        # For now, we'll just return a simple task ID.
+        # In a real system, this would be a proper task queue ID.
+        task_id = f"task_{workflow_id}_{int(datetime.utcnow().timestamp())}"
+        
+        return {"task_id": task_id, "status": "accepted"}
+        
+    except ConfigurationError as e:
+        logger.error(f"Configuration error executing workflow {workflow_id}: {e}")
+        raise HTTPException(status_code=400, detail=str(e))
+    except CallieException as e:
+        logger.error(f"Failed to execute workflow {workflow_id}: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+    except Exception as e:
+        logger.error(f"An unexpected error occurred during workflow execution {workflow_id}: {e}")
+        raise HTTPException(status_code=500, detail="An unexpected error occurred.")
 
 
 @app.get("/api/v1/workflows/{workflow_id}/executions", response_model=List[WorkflowExecution])
@@ -536,9 +455,12 @@ async def list_workflow_executions(
     """List executions for a specific workflow."""
     try:
         return firestore.list_workflow_executions(workflow_id=workflow_id, limit=limit)
-    except Exception as e:
+    except CallieException as e:
         logger.error(f"Failed to list executions for workflow {workflow_id}: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+    except Exception as e:
+        logger.error(f"An unexpected error occurred while listing executions for workflow {workflow_id}: {e}")
+        raise HTTPException(status_code=500, detail="An unexpected error occurred.")
 
 
 @app.get("/api/v1/workflow-executions/{execution_id}", response_model=WorkflowExecution)
@@ -550,13 +472,16 @@ async def get_workflow_execution(
     try:
         execution = firestore.get_workflow_execution(execution_id)
         if execution is None:
-            raise HTTPException(status_code=404, detail=f"Workflow execution {execution_id} not found")
+            raise ConfigurationError(f"Workflow execution {execution_id} not found")
         return execution
-    except HTTPException:
-        raise
-    except Exception as e:
+    except ConfigurationError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except CallieException as e:
         logger.error(f"Failed to get workflow execution {execution_id}: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+    except Exception as e:
+        logger.error(f"An unexpected error occurred while getting workflow execution {execution_id}: {e}")
+        raise HTTPException(status_code=500, detail="An unexpected error occurred.")
 
 
 @app.get("/api/v1/workflow-executions", response_model=List[WorkflowExecution])
@@ -567,9 +492,12 @@ async def list_all_workflow_executions(
     """List all workflow executions across all workflows."""
     try:
         return firestore.list_workflow_executions(limit=limit)
-    except Exception as e:
+    except CallieException as e:
         logger.error(f"Failed to list all workflow executions: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+    except Exception as e:
+        logger.error(f"An unexpected error occurred while listing all workflow executions: {e}")
+        raise HTTPException(status_code=500, detail="An unexpected error occurred.")
 
 
 if __name__ == "__main__":

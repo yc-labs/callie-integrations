@@ -7,7 +7,7 @@ import subprocess
 from typing import Optional
 
 # Base version - update this for major releases
-BASE_VERSION = "1.0.0"
+BASE_VERSION = "2.0.0"
 
 def get_git_commit_sha() -> Optional[str]:
     """Get the current git commit SHA."""
