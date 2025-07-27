@@ -274,6 +274,111 @@ class ShipStationConnector(BaseConnector):
         """ShipStation connector is read-only for inventory."""
         raise NotImplementedError("ShipStation connector does not support writing inventory")
 
+    def _find_missing_skus(self, target_skus: List[str], found_inventory: List[Dict[str, Any]]) -> List[str]:
+        """Find SKUs that were requested but not found in inventory."""
+        found_skus = {item.get("sku") for item in found_inventory if item.get("sku")}
+        missing_skus = [sku for sku in target_skus if sku not in found_skus]
+        logger.info(f"Found {len(missing_skus)} SKUs missing from inventory out of {len(target_skus)} requested")
+        return missing_skus
+
+    def _combine_inventory_data(self, actual_inventory: List[Dict[str, Any]], zero_inventory: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """Combine actual inventory data with zero inventory items."""
+        combined = actual_inventory.copy()
+        combined.extend(zero_inventory)
+        logger.info(f"Combined {len(actual_inventory)} actual inventory items with {len(zero_inventory)} zero inventory items")
+        return combined
+
+    def read_products(self, **filters) -> List[Dict[str, Any]]:
+        """
+        Read products from ShipStation.
+        
+        Supported filters:
+        - sku_list: List of specific SKUs to fetch
+        - limit: Number of items to fetch
+        - active: Filter by active status
+        """
+        try:
+            if "sku_list" in filters:
+                return self._read_products_for_sku_list(filters["sku_list"])
+            
+            # General product read (paginated)
+            all_products = []
+            page = 1
+            limit = filters.get("limit")
+            
+            while True:
+                params = {"page": page, "page_size": 100}
+                
+                # Add filters
+                if "active" in filters:
+                    params["active"] = filters["active"]
+                
+                response = requests.get(
+                    f"{self.base_url}/v2/products",
+                    headers={"API-Key": self.credentials["api_key"]},
+                    params=params,
+                    timeout=30
+                )
+                
+                if response.status_code != 200:
+                    raise ShipStationAPIError(f"HTTP {response.status_code}: {response.text}")
+                
+                data = response.json()
+                products = data.get("products", [])
+                
+                if not products:
+                    break
+                
+                all_products.extend(products)
+                
+                # Check if we've reached the limit
+                if limit and len(all_products) >= limit:
+                    break
+                
+                # Check if we've reached the last page
+                if len(products) < 100:  # Less than page size means last page
+                    break
+                
+                page += 1
+            
+            final_products = all_products[:limit] if limit else all_products
+            logger.info(f"Successfully fetched {len(final_products)} products from ShipStation")
+            return final_products
+            
+        except requests.exceptions.RequestException as e:
+            raise ShipStationAPIError(f"Request failed: {e}")
+        except Exception as e:
+            raise ShipStationAPIError(f"Unexpected error: {e}")
+
+    def _read_products_for_sku_list(self, sku_list: List[str]) -> List[Dict[str, Any]]:
+        """Fetch products for a specific list of SKUs."""
+        all_products = []
+        
+        for sku in sku_list:
+            try:
+                params = {"sku": sku}
+                response = requests.get(
+                    f"{self.base_url}/v2/products",
+                    headers={"API-Key": self.credentials["api_key"]},
+                    params=params,
+                    timeout=15
+                )
+                
+                if response.status_code == 200:
+                    data = response.json()
+                    products = data.get("products", [])
+                    all_products.extend(products)
+                else:
+                    logger.warning(f"Failed to fetch product for SKU {sku}: HTTP {response.status_code}")
+                    
+            except requests.exceptions.RequestException as e:
+                logger.error(f"Request failed for SKU {sku}: {e}")
+            except Exception as e:
+                logger.error(f"Unexpected error for SKU {sku}: {e}")
+        
+        logger.info(f"Successfully fetched {len(all_products)} products for {len(sku_list)} requested SKUs")
+        return all_products
+
 
 def create_shipstation_connector(api_key: str, base_url: str = "https://api.shipstation.com") -> ShipStationConnector:
     """
