@@ -64,7 +64,22 @@ class SyncEngine:
             
             # Read data from source
             logger.info(f"Reading data from {config.source.service_type}")
-            source_data = source_connector.read_inventory(**config.sync_options)
+
+            # Get target SKUs to filter source data
+            logger.info(f"Reading target SKUs from {config.target.service_type} for targeted sync")
+            try:
+                target_inventory = target_connector.read_inventory()
+                target_skus = [item.get("sku") for item in target_inventory if item.get("sku")]
+                logger.info(f"Found {len(target_skus)} SKUs in target system")
+            except Exception as e:
+                logger.error(f"Could not read target SKUs: {e}. Proceeding with unfiltered source read.")
+                target_skus = []
+
+            source_read_options = config.sync_options.copy()
+            if target_skus:
+                source_read_options["sku_list"] = target_skus
+
+            source_data = source_connector.read_inventory(**source_read_options)
             logger.info(f"Retrieved {len(source_data)} items from source")
             
             # Transform data using field mappings
@@ -125,6 +140,8 @@ class SyncEngine:
         
         # Read existing target data for comparison
         try:
+            # We already read this in execute_sync, but we can't easily pass it down
+            # so we re-read. This could be optimized.
             target_data = target_connector.read_inventory()
             target_by_sku = {item.get("sku"): item for item in target_data if item.get("sku")}
         except Exception as e:

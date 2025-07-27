@@ -107,13 +107,23 @@ class ShipStationConnector(BaseConnector):
         Supported filters:
         - limit: Number of items to fetch
         - sku: Specific SKU to filter
+        - sku_list: List of specific SKUs to fetch
         - inventory_warehouse_id: Filter by warehouse
         - inventory_location_id: Filter by location
         - group_by: Group results by 'warehouse' or 'location'
         """
+        # Handle specific SKU list for targeted sync
+        limit = filters.get("limit")
+        if "sku_list" in filters:
+            sku_list = filters["sku_list"]
+            if limit:
+                sku_list = sku_list[:limit] # Respect the limit
+            logger.info(f"Fetching ShipStation inventory for {len(sku_list)} specific SKUs")
+            return self._read_inventory_for_sku_list(sku_list)
+
+        # Original pagination logic for general inventory fetch
         all_items = []
         page = 1
-        limit = filters.get("limit")  # No default limit - fetch all items
         
         # Build query parameters
         # Note: ShipStation appears to have a fixed page size of ~50 items regardless of limit
@@ -194,6 +204,71 @@ class ShipStationConnector(BaseConnector):
             raise ShipStationAPIError(f"Request failed: {e}")
         except Exception as e:
             raise ShipStationAPIError(f"Unexpected error: {e}")
+
+    def _read_inventory_for_sku_list(self, sku_list: List[str]) -> List[Dict[str, Any]]:
+        """Fetch inventory for a specific list of SKUs."""
+        all_items = []
+        for sku in sku_list:
+            try:
+                params = {"sku": sku}
+                response = requests.get(
+                    f"{self.base_url}/v2/inventory",
+                    headers={"API-Key": self.credentials["api_key"]},
+                    params=params,
+                    timeout=15
+                )
+                if response.status_code == 200:
+                    data = response.json()
+                    inventory_items = data.get("inventory", [])
+                    if inventory_items:
+                        item = inventory_items[0] # Should only be one
+                        all_items.append({
+                            "sku": item.get("sku"),
+                            "on_hand": item.get("on_hand", 0),
+                            "allocated": item.get("allocated", 0),
+                            "available": item.get("available", 0),
+                            "average_cost": item.get("average_cost"),
+                            "inventory_warehouse_id": item.get("inventory_warehouse_id"),
+                            "inventory_location_id": item.get("inventory_location_id")
+                        })
+                    else:
+                        # No inventory record found, check if SKU exists as a product
+                        logger.info(f"No inventory record for SKU {sku}, checking if it exists as a product...")
+                        product_response = requests.get(
+                            f"{self.base_url}/v2/products",
+                            headers={"API-Key": self.credentials["api_key"]},
+                            params={"sku": sku},
+                            timeout=15
+                        )
+                        if product_response.status_code == 200:
+                            product_data = product_response.json()
+                            products = product_data.get("products", [])
+                            if products and products[0].get("active", False):
+                                # Product exists and is active, treat as zero inventory
+                                logger.info(f"SKU {sku} exists as active product but has no inventory. Setting to zero.")
+                                all_items.append({
+                                    "sku": sku,
+                                    "on_hand": 0,
+                                    "allocated": 0,
+                                    "available": 0,
+                                    "average_cost": None,
+                                    "inventory_warehouse_id": None,
+                                    "inventory_location_id": None
+                                })
+                            else:
+                                logger.warning(f"SKU {sku} either doesn't exist as a product or is inactive in ShipStation.")
+                        else:
+                            logger.error(f"Failed to check product for SKU {sku}: HTTP {product_response.status_code}")
+                else:
+                    logger.error(f"Failed to fetch SKU {sku}: HTTP {response.status_code} - {response.text}")
+
+            except requests.exceptions.RequestException as e:
+                logger.error(f"Request failed for SKU {sku}: {e}")
+            except Exception as e:
+                logger.error(f"Unexpected error for SKU {sku}: {e}")
+        
+        logger.info(f"Successfully fetched inventory for {len(all_items)} out of {len(sku_list)} requested SKUs.")
+        return all_items
     
     def _write_inventory(self, items: List[Dict[str, Any]]) -> Dict[str, Any]:
         """ShipStation connector is read-only for inventory."""

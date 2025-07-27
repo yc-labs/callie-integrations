@@ -241,13 +241,14 @@ class InfiPlexConnector(BaseConnector):
             return {"success": 0, "failed": len(items), "total": len(items)}
         
         try:
+            payload = {"inventory_items": bulk_items} # Wrap the list in a dictionary
             response = requests.post(
                 f"{self.base_url}/api/admin/shop/inventory/bulk_update",
                 headers={
                     "Authorization": f"Bearer {self.credentials['api_key']}",
                     "Content-Type": "application/json"
                 },
-                json=bulk_items,
+                json=payload,
                 timeout=60
             )
             

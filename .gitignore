@@ -107,4 +107,4 @@ sync_analysis.txt
 # Local development
 .env
 credentials.json
-docker-compose.override.yml 
+docker-compose.override.yml credentials.json
