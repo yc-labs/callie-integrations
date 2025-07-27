@@ -233,8 +233,8 @@ class InfiPlexConnector(BaseConnector):
                 
             bulk_items.append({
                 "sku": sku,
-                "warehouse_id": warehouse_id,
-                "quantity_to_set": quantity
+                "warehouse_id": str(warehouse_id),  # Convert to string to match InfiPlex format
+                "quantity_to_set": int(quantity)    # Ensure it's an integer
             })
         
         if not bulk_items:

@@ -253,10 +253,22 @@ class WorkflowEngine:
 
         # Filter arguments to only include those the method accepts
         sig = inspect.signature(method)
-        filtered_args = {
-            k: v for k, v in method_args.items()
-            if k in sig.parameters
-        }
+        
+        # Check if method accepts **kwargs (VAR_KEYWORD)
+        accepts_kwargs = any(
+            param.kind == inspect.Parameter.VAR_KEYWORD 
+            for param in sig.parameters.values()
+        )
+        
+        if accepts_kwargs:
+            # If method accepts **kwargs, pass all arguments through
+            filtered_args = {k: v for k, v in method_args.items() if k != 'self'}
+        else:
+            # Otherwise, filter to only include named parameters
+            filtered_args = {
+                k: v for k, v in method_args.items()
+                if k in sig.parameters
+            }
 
         logger.info(f"Calling {stage.connector}.{method_name} with args: {list(filtered_args.keys())}")
 

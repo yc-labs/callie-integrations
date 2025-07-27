@@ -112,6 +112,14 @@ class ShipStationConnector(BaseConnector):
         - inventory_location_id: Filter by location
         - group_by: Group results by 'warehouse' or 'location'
         """
+        # DEBUG: Log all parameters received
+        logger.info(f"ShipStation _read_inventory called with filters: {list(filters.keys())}")
+        for key, value in filters.items():
+            if key == "sku_list" and isinstance(value, list):
+                logger.info(f"sku_list parameter received with {len(value)} SKUs: {value[:5]}...")
+            else:
+                logger.info(f"Parameter {key}: {type(value).__name__} = {str(value)[:100]}...")
+        
         # Handle specific SKU list for targeted sync
         limit = filters.get("limit")
         if "sku_list" in filters:
