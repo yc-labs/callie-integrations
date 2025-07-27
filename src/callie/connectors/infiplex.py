@@ -241,7 +241,12 @@ class InfiPlexConnector(BaseConnector):
             return {"success": 0, "failed": len(items), "total": len(items)}
         
         try:
-            payload = {"inventory_items": bulk_items} # Wrap the list in a dictionary
+            # InfiPlex expects an array directly, NOT wrapped in an object
+            payload = bulk_items  # Send array directly
+            logger.info(f"InfiPlex bulk update: Sending {len(bulk_items)} items to {self.base_url}/api/admin/shop/inventory/bulk_update")
+            logger.info(f"First 3 items: {bulk_items[:3]}")
+            logger.info(f"Sending direct array (not wrapped in object): {type(payload)}")
+            
             response = requests.post(
                 f"{self.base_url}/api/admin/shop/inventory/bulk_update",
                 headers={
