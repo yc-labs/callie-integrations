@@ -34,44 +34,36 @@ async def lifespan(app: FastAPI):
     """Application lifespan manager."""
     global firestore_service, scheduler_service, secret_service, workflow_engine
     
-    # Initialize services
+    logger.info("Application startup initiated...")
+    
     project_id = os.getenv("GOOGLE_CLOUD_PROJECT")
+    if not project_id:
+        logger.error("GOOGLE_CLOUD_PROJECT environment variable is not set.")
+        raise ConfigurationError("GOOGLE_CLOUD_PROJECT must be set.")
+        
     region = os.getenv("GOOGLE_CLOUD_REGION", "us-central1")
     
     try:
-        # Initialize Secret Manager service
-        try:
-            secret_service = SecretManagerService(project_id=project_id)
-            logger.info("Secret Manager service initialized successfully")
-        except Exception as e:
-            logger.error(f"Failed to initialize Secret Manager service: {e}")
-            secret_service = None
+        # Initialize services, failing fast if any critical service fails
+        secret_service = SecretManagerService(project_id=project_id)
+        logger.info("✅ Secret Manager service initialized successfully")
         
-        # Initialize Firestore service
-        try:
-            firestore_service = FirestoreService(project_id=project_id)
-            logger.info("Firestore service initialized successfully")
-        except Exception as e:
-            logger.error(f"Failed to initialize Firestore service: {e}")
-            firestore_service = None
+        firestore_service = FirestoreService(project_id=project_id)
+        logger.info("✅ Firestore service initialized successfully")
         
-        # Initialize Scheduler service
-        try:
-            scheduler_service = SchedulerService(project_id=project_id, region=region)
-            logger.info("Scheduler service initialized successfully")
-        except Exception as e:
-            logger.error(f"Failed to initialize Scheduler service: {e}")
-            scheduler_service = None
+        scheduler_service = SchedulerService(project_id=project_id, region=region)
+        logger.info("✅ Scheduler service initialized successfully")
         
-        # Initialize Workflow Engine
-        workflow_engine = WorkflowEngine()
-        logger.info("Workflow engine initialized successfully")
+        # Pass the secret_service to the workflow_engine
+        workflow_engine = WorkflowEngine(secret_service=secret_service)
+        logger.info("✅ Workflow engine initialized successfully")
         
-        logger.info("Application startup complete")
+        logger.info("🚀 Application startup complete. All services are healthy.")
         
     except Exception as e:
-        logger.error(f"Failed to initialize application services: {e}")
-        # Don't raise - let the app start but services will be None
+        logger.critical(f"❌ Failed to initialize critical application services: {e}", exc_info=True)
+        # Re-raise the exception to prevent the application from starting in a broken state
+        raise
     
     yield
     
