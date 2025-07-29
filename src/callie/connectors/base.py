@@ -56,12 +56,6 @@ class BaseConnector(ABC):
         # self._validate_credentials() # This is now handled by each connector method
         logger.info(f"Initialized {self.__class__.__name__} connector")
     
-    @abstractmethod
-    def _validate_credentials(self) -> None:
-        """Validate that required credentials are provided."""
-        pass
-    
-    @abstractmethod
     def get_capabilities(self) -> ConnectorCapability:
         """Return what operations this connector supports."""
         pass
