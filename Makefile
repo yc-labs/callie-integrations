@@ -39,7 +39,9 @@ test-local:
 
 build-api:
 	@echo "🏗️ Building API image with Cloud Build..."
-	gcloud builds submit --config cloudbuild.api.yaml .
+	@VERSION=$$(python -c "from src.callie.version import get_docker_tag; print(get_docker_tag())") && \
+	COMMIT_SHA=$$(git rev-parse --short HEAD) && \
+	gcloud builds submit --config cloudbuild.api.yaml --substitutions=_VERSION=$$VERSION,_COMMIT_SHA=$$COMMIT_SHA .
 
 deploy-api: build-api
 	@echo "🚀 Deploying API to Cloud Run..."
