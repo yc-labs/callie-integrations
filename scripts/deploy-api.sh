@@ -57,7 +57,6 @@ gcloud run deploy $SERVICE_NAME \
     --project=$PROJECT_ID \
     --service-account=$SERVICE_ACCOUNT \
     --set-env-vars="GOOGLE_CLOUD_PROJECT=$PROJECT_ID,GOOGLE_CLOUD_REGION=$REGION" \
-    --set-secrets="SHIPSTATION_API_KEY=shipstation-api-key:latest,SHIPSTATION_BASE_URL=shipstation-base-url:latest,INFIPLEX_API_KEY=infiplex-api-key:latest,INFIPLEX_BASE_URL=infiplex-base-url:latest" \
     --allow-unauthenticated \
     --memory=1Gi \
     --cpu=1 \

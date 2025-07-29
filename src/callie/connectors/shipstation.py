@@ -18,11 +18,6 @@ class ShipStationConnector(BaseConnector):
     Supports reading inventory levels and product information from ShipStation V2 API.
     """
     
-    def _validate_credentials(self) -> None:
-        """Validate that API key is provided."""
-        if "api_key" not in self.credentials:
-            raise ValueError("ShipStation connector requires 'api_key' in credentials")
-    
     def get_capabilities(self) -> ConnectorCapability:
         """ShipStation can read inventory but not write."""
         return ConnectorCapability(
@@ -100,17 +95,9 @@ class ShipStationConnector(BaseConnector):
             logger.error(f"ShipStation connection test failed: {e}")
             return False
     
-    def _read_inventory(self, **filters) -> List[Dict[str, Any]]:
+    def _read_inventory(self, api_key: str, base_url: str, **filters) -> List[Dict[str, Any]]:
         """
-        Read inventory from ShipStation.
-        
-        Supported filters:
-        - limit: Number of items to fetch
-        - sku: Specific SKU to filter
-        - sku_list: List of specific SKUs to fetch
-        - inventory_warehouse_id: Filter by warehouse
-        - inventory_location_id: Filter by location
-        - group_by: Group results by 'warehouse' or 'location'
+        Read inventory from ShipStation, now with robust pagination.
         """
         # DEBUG: Log all parameters received
         logger.info(f"ShipStation _read_inventory called with filters: {list(filters.keys())}")
@@ -122,23 +109,25 @@ class ShipStationConnector(BaseConnector):
         
         # Handle specific SKU list for targeted sync
         limit = filters.get("limit")
+        
+        # Check for SKU list under different parameter names
+        sku_list = None
         if "sku_list" in filters:
             sku_list = filters["sku_list"]
+        elif "target_skus" in filters:
+            sku_list = filters["target_skus"]
+        
+        if sku_list:
             if limit:
                 sku_list = sku_list[:limit] # Respect the limit
             logger.info(f"Fetching ShipStation inventory for {len(sku_list)} specific SKUs")
-            return self._read_inventory_for_sku_list(sku_list)
+            return self._read_inventory_for_sku_list(sku_list, api_key, base_url)
 
-        # Original pagination logic for general inventory fetch
+        # --- REVISED PAGINATION LOGIC ---
         all_items = []
-        page = 1
         
-        # Build query parameters
-        # Note: ShipStation appears to have a fixed page size of ~50 items regardless of limit
-        params = {"limit": 500}  # ShipStation max per page is 500
-        if limit:
-            # If a specific limit is requested, respect it
-            params["limit"] = min(limit, 500)
+        # Build initial query parameters for the first request
+        params = {"limit": 500}  # Use max page size
         if "sku" in filters:
             params["sku"] = filters["sku"]
         if "inventory_warehouse_id" in filters:
@@ -148,17 +137,21 @@ class ShipStationConnector(BaseConnector):
         if "group_by" in filters:
             params["group_by"] = filters["group_by"]
         
+        next_url = f"{base_url}/v2/inventory"
+        page_num = 1
+
         try:
-            total_pages = None
-            while True:
-                params["page"] = page
+            while next_url:
+                logger.info(f"Fetching ShipStation inventory page {page_num} from URL: {next_url}")
                 
-                logger.info(f"Fetching ShipStation inventory page {page} with params: {params}")
+                # Params are only needed for the very first request. 
+                # Subsequent requests use the full URL from the 'next' link.
+                request_params = params if page_num == 1 else None
                 
                 response = requests.get(
-                    f"{self.base_url}/v2/inventory",
-                    headers={"API-Key": self.credentials["api_key"]},
-                    params=params,
+                    next_url,
+                    headers={"API-Key": api_key},
+                    params=request_params,
                     timeout=30
                 )
                 
@@ -167,15 +160,9 @@ class ShipStationConnector(BaseConnector):
                 
                 data = response.json()
                 inventory_items = data.get("inventory", [])
-                
-                # Get total pages from first response
-                if total_pages is None:
-                    total_pages = data.get("pages", 1)
-                    total_items = data.get("total", 0)
-                    logger.info(f"ShipStation API reports {total_items} total items across {total_pages} pages")
-                
-                if not inventory_items:
-                    logger.info(f"No inventory items returned on page {page}, stopping")
+
+                if not inventory_items and page_num > 1:
+                    logger.info(f"No more inventory items returned on page {page_num}, stopping.")
                     break
                 
                 # Convert to standard format
@@ -190,38 +177,68 @@ class ShipStationConnector(BaseConnector):
                         "inventory_location_id": item.get("inventory_location_id")
                     })
                 
-                logger.info(f"Fetched {len(inventory_items)} items from page {page}, total so far: {len(all_items)}")
+                logger.info(f"Fetched {len(inventory_items)} items from page {page_num}, total so far: {len(all_items)}")
                 
-                # Check if we've fetched enough items (respect user's limit)
-                if limit and len(all_items) >= limit:
-                    logger.info(f"Reached requested limit of {limit} items")
-                    break
-                    
-                # Check if we've reached the last page
-                if page >= total_pages:
-                    logger.info(f"Reached last page {total_pages}")
-                    break
-                    
-                page += 1
+                # NEW: Use the 'next' link for pagination
+                links = data.get("links", {})
+                next_link_info = links.get("next")
+                
+                if next_link_info and next_link_info.get("href"):
+                    next_url = next_link_info["href"]
+                    page_num += 1
+                else:
+                    logger.info("No 'next' link provided by ShipStation API. Reached the end.")
+                    next_url = None # End the loop
             
             final_items = all_items[:limit] if limit else all_items  # Ensure we don't exceed requested limit
-            logger.info(f"Successfully fetched {len(final_items)} inventory items from ShipStation (out of {len(all_items)} total fetched)")
-            return final_items
+            
+            # CRITICAL FIX: Deduplicate by SKU and aggregate quantities
+            # ShipStation API returns same SKU across multiple warehouses/locations
+            sku_aggregated = {}
+            for item in final_items:
+                sku = item.get("sku")
+                if not sku:
+                    continue
+                    
+                if sku not in sku_aggregated:
+                    sku_aggregated[sku] = {
+                        "sku": sku,
+                        "on_hand": 0,
+                        "allocated": 0,
+                        "available": 0,
+                        "average_cost": item.get("average_cost"),
+                        "inventory_warehouse_id": item.get("inventory_warehouse_id"),
+                        "inventory_location_id": item.get("inventory_location_id")
+                    }
+                
+                # Aggregate quantities across all warehouse locations
+                sku_aggregated[sku]["on_hand"] += item.get("on_hand", 0)
+                sku_aggregated[sku]["allocated"] += item.get("allocated", 0) 
+                sku_aggregated[sku]["available"] += item.get("available", 0)
+            
+            # Convert back to list
+            deduplicated_items = list(sku_aggregated.values())
+            
+            logger.info(f"Deduplicated from {len(final_items)} total items to {len(deduplicated_items)} unique SKUs")
+            return deduplicated_items
             
         except requests.exceptions.RequestException as e:
             raise ShipStationAPIError(f"Request failed: {e}")
         except Exception as e:
             raise ShipStationAPIError(f"Unexpected error: {e}")
 
-    def _read_inventory_for_sku_list(self, sku_list: List[str]) -> List[Dict[str, Any]]:
-        """Fetch inventory for a specific list of SKUs."""
+    def _read_inventory_for_sku_list(self, sku_list: List[str], api_key: str, base_url: str) -> List[Dict[str, Any]]:
+        """
+        Read inventory from ShipStation for a specific list of SKUs.
+        NOW ACCEPTS api_key and base_url directly.
+        """
         all_items = []
         for sku in sku_list:
             try:
                 params = {"sku": sku}
                 response = requests.get(
-                    f"{self.base_url}/v2/inventory",
-                    headers={"API-Key": self.credentials["api_key"]},
+                    f"{base_url}/v2/inventory",
+                    headers={"API-Key": api_key},
                     params=params,
                     timeout=15
                 )
@@ -243,8 +260,8 @@ class ShipStationConnector(BaseConnector):
                         # No inventory record found, check if SKU exists as a product
                         logger.info(f"No inventory record for SKU {sku}, checking if it exists as a product...")
                         product_response = requests.get(
-                            f"{self.base_url}/v2/products",
-                            headers={"API-Key": self.credentials["api_key"]},
+                            f"{base_url}/v2/products",
+                            headers={"API-Key": api_key},
                             params={"sku": sku},
                             timeout=15
                         )

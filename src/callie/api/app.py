@@ -32,51 +32,47 @@ workflow_engine: Optional[WorkflowEngine] = None
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Application lifespan manager."""
-    global firestore_service, scheduler_service, secret_service, workflow_engine
-    
-    # Initialize services
-    project_id = os.getenv("GOOGLE_CLOUD_PROJECT")
-    region = os.getenv("GOOGLE_CLOUD_REGION", "us-central1")
-    
-    try:
-        # Initialize Secret Manager service
-        try:
-            secret_service = SecretManagerService(project_id=project_id)
-            logger.info("Secret Manager service initialized successfully")
-        except Exception as e:
-            logger.error(f"Failed to initialize Secret Manager service: {e}")
-            secret_service = None
-        
-        # Initialize Firestore service
-        try:
-            firestore_service = FirestoreService(project_id=project_id)
-            logger.info("Firestore service initialized successfully")
-        except Exception as e:
-            logger.error(f"Failed to initialize Firestore service: {e}")
-            firestore_service = None
-        
-        # Initialize Scheduler service
-        try:
-            scheduler_service = SchedulerService(project_id=project_id, region=region)
-            logger.info("Scheduler service initialized successfully")
-        except Exception as e:
-            logger.error(f"Failed to initialize Scheduler service: {e}")
-            scheduler_service = None
-        
-        # Initialize Workflow Engine
-        workflow_engine = WorkflowEngine()
-        logger.info("Workflow engine initialized successfully")
-        
-        logger.info("Application startup complete")
-        
-    except Exception as e:
-        logger.error(f"Failed to initialize application services: {e}")
-        # Don't raise - let the app start but services will be None
-    
+    # Remove service initialization from lifespan - use lazy initialization instead
+    print("🚀 LIFESPAN: Starting with lazy service initialization...")
     yield
-    
-    # Cleanup on shutdown
-    logger.info("Application shutdown")
+    print("🛑 LIFESPAN: Application shutdown")
+
+
+# Lazy initialization functions
+def get_secret_service_instance() -> SecretManagerService:
+    global secret_service
+    if secret_service is None:
+        project_id = os.getenv("GOOGLE_CLOUD_PROJECT") or "yc-partners"  # Temporary hardcode fallback
+        if not project_id:
+            raise ConfigurationError("GOOGLE_CLOUD_PROJECT must be set.")
+        secret_service = SecretManagerService(project_id=project_id)
+    return secret_service
+
+def get_firestore_service_instance() -> FirestoreService:
+    global firestore_service
+    if firestore_service is None:
+        project_id = os.getenv("GOOGLE_CLOUD_PROJECT") or "yc-partners"  # Temporary hardcode fallback
+        if not project_id:
+            raise ConfigurationError("GOOGLE_CLOUD_PROJECT must be set.")
+        firestore_service = FirestoreService(project_id=project_id)
+    return firestore_service
+
+def get_scheduler_service_instance() -> SchedulerService:
+    global scheduler_service
+    if scheduler_service is None:
+        project_id = os.getenv("GOOGLE_CLOUD_PROJECT") or "yc-partners"  # Temporary hardcode fallback
+        region = os.getenv("GOOGLE_CLOUD_REGION", "us-central1")
+        if not project_id:
+            raise ConfigurationError("GOOGLE_CLOUD_PROJECT must be set.")
+        scheduler_service = SchedulerService(project_id=project_id, region=region)
+    return scheduler_service
+
+def get_workflow_engine_instance() -> WorkflowEngine:
+    global workflow_engine
+    if workflow_engine is None:
+        secret_svc = get_secret_service_instance()
+        workflow_engine = WorkflowEngine(secret_service=secret_svc)
+    return workflow_engine
 
 
 app = FastAPI(
@@ -104,23 +100,20 @@ app.add_middleware(
 
 # Dependency injection
 def get_firestore_service() -> FirestoreService:
-    if firestore_service is None:
-        raise HTTPException(status_code=500, detail="Firestore service not initialized")
-    return firestore_service
+    return get_firestore_service_instance()
 
 def get_scheduler_service() -> SchedulerService:
-    if scheduler_service is None:
-        raise HTTPException(status_code=500, detail="Scheduler service not initialized")
-    return scheduler_service
+    return get_scheduler_service_instance()
 
 def get_secret_service() -> Optional[SecretManagerService]:
     """Get Secret Manager service if available, otherwise return None."""
-    return secret_service
+    try:
+        return get_secret_service_instance()
+    except Exception:
+        return None
 
 def get_workflow_engine() -> WorkflowEngine:
-    if workflow_engine is None:
-        raise HTTPException(status_code=500, detail="Workflow engine not initialized")
-    return workflow_engine
+    return get_workflow_engine_instance()
 
 
 def inject_credentials_into_workflow(workflow: WorkflowConfig, credentials: Dict[str, str]) -> WorkflowConfig:
@@ -147,14 +140,43 @@ def inject_credentials_into_workflow(workflow: WorkflowConfig, credentials: Dict
 @app.get("/health")
 async def health_check():
     """Check the health of the application and its services."""
+    services_status = {}
+    
+    # Test each service by trying to initialize it
+    for service_name, get_service_func in [
+        ("firestore", get_firestore_service_instance),
+        ("scheduler", get_scheduler_service_instance), 
+        ("secret_manager", get_secret_service_instance),
+        ("workflow_engine", get_workflow_engine_instance)
+    ]:
+        try:
+            service = get_service_func()
+            services_status[service_name] = {
+                "status": service is not None,
+                "error": None
+            }
+        except Exception as e:
+            services_status[service_name] = {
+                "status": False,
+                "error": str(e)
+            }
+    
     return {
         "status": "healthy",
-        "services": {
-            "firestore": firestore_service is not None,
-            "scheduler": scheduler_service is not None,
-            "secret_manager": secret_service is not None,
-            "workflow_engine": workflow_engine is not None,
-        }
+        "services": services_status
+    }
+
+# Debug endpoint to check environment variables
+@app.get("/debug/env")
+async def debug_env():
+    """Debug endpoint to check environment variables."""
+    import os
+    return {
+        "GOOGLE_CLOUD_PROJECT": os.getenv("GOOGLE_CLOUD_PROJECT"),
+        "GCP_PROJECT_ID": os.getenv("GCP_PROJECT_ID"),
+        "GOOGLE_APPLICATION_CREDENTIALS": os.getenv("GOOGLE_APPLICATION_CREDENTIALS"),
+        "PORT": os.getenv("PORT"),
+        "all_google_vars": {k: v for k, v in os.environ.items() if "GOOGLE" in k.upper()}
     }
 
 
@@ -344,24 +366,13 @@ async def execute_workflow_sync(
                 logger.info(f"Retrieved credentials from Secret Manager: {list(credentials.keys())}")
             except Exception as e:
                 logger.error(f"Failed to get credentials from Secret Manager: {e}")
-        
-        # Fall back to environment variables if no secret service or secret retrieval failed
-        if not credentials:
-            logger.info("Using environment variables for credentials")
-            credentials = {
-                "SHIPSTATION_API_KEY": os.getenv("SHIPSTATION_API_KEY", ""),
-                "SHIPSTATION_BASE_URL": os.getenv("SHIPSTATION_BASE_URL", "https://api.shipstation.com"),
-                "INFIPLEX_API_KEY": os.getenv("INFIPLEX_API_KEY", ""),
-                "INFIPLEX_BASE_URL": os.getenv("INFIPLEX_BASE_URL", ""),
-                "API_BASE_URL": os.getenv("API_BASE_URL", "http://localhost:8000"),
-            }
-        
-        # Inject credentials into workflow
-        workflow_with_credentials = inject_credentials_into_workflow(workflow, credentials)
-        logger.info(f"Injected credentials into workflow")
-        
+
         # Execute workflow synchronously
-        execution = workflow_engine.execute_workflow(workflow_with_credentials, triggered_by="manual-sync")
+        try:
+            execution = workflow_engine.execute_workflow(workflow, triggered_by="manual-sync", initial_variables=credentials)
+        except Exception as e:
+            logger.error(f"Error in execute_workflow: {e}", exc_info=True)
+            raise HTTPException(status_code=500, detail="Error executing workflow.")
         
         return execution
         
@@ -373,6 +384,11 @@ async def execute_workflow_sync(
         raise HTTPException(status_code=500, detail=str(e))
     except Exception as e:
         logger.error(f"An unexpected error occurred during workflow execution {workflow_id}: {e}")
+        # Return the execution object even if it failed partway through
+        if 'execution' in locals():
+            execution.status = "failed"
+            execution.error_message = f"An unexpected error occurred: {e}"
+            return execution
         raise HTTPException(status_code=500, detail="An unexpected error occurred.")
 
 
@@ -503,4 +519,11 @@ async def list_all_workflow_executions(
 if __name__ == "__main__":
     import uvicorn
     port = int(os.getenv("PORT", 8000))
-    uvicorn.run(app, host="0.0.0.0", port=port) 
+    # Use log_level=debug to help with debugging
+    uvicorn.run(
+        "callie.api.app:app", 
+        host="0.0.0.0", 
+        port=port,
+        log_level="info",
+        reload=False
+    ) 

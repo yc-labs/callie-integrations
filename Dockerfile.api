@@ -5,27 +5,28 @@ WORKDIR /app
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
     gcc \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Poetry
 RUN pip install poetry
 
-# Configure Poetry
+# Configure Poetry to install dependencies to the system python
 ENV POETRY_NO_INTERACTION=1 \
-    POETRY_VENV_IN_PROJECT=1 \
+    POETRY_VIRTUALENVS_CREATE=false \
     POETRY_CACHE_DIR=/tmp/poetry_cache
 
 # Copy Poetry files
 COPY pyproject.toml poetry.lock ./
 
-# Install dependencies
+# Install dependencies into the system python
 RUN poetry install --only=main --no-root && rm -rf $POETRY_CACHE_DIR
 
 # Copy source code
 COPY src/ ./src/
 COPY README.md ./
 
-# Install the project
+# Install the project itself into the system python
 RUN poetry install --only=main
 
 # Set Python path
@@ -39,4 +40,4 @@ USER app
 EXPOSE 8000
 
 # Run FastAPI application
-ENTRYPOINT ["poetry", "run", "python", "-m", "callie.api.app"] 
+ENTRYPOINT ["python", "-m", "callie.api.app"]

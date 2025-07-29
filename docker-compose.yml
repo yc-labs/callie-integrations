@@ -17,4 +17,25 @@ services:
       - ./credentials.json:/app/credentials.json:ro  # Mount service account key
       - ./src:/app/src  # Mount source for hot reload during development
     command: ["poetry", "run", "python", "-m", "callie.api.app"]
-    restart: unless-stopped 
+    restart: unless-stopped
+    networks:
+      - callie-network
+
+  callie-ui:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_API_URL=http://callie-api:8000/api/v1
+    depends_on:
+      - callie-api
+    restart: unless-stopped
+    networks:
+      - callie-network
+
+networks:
+  callie-network:
+    driver: bridge 

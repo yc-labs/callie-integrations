@@ -9,6 +9,7 @@ from datetime import datetime
 from enum import Enum
 from typing import Dict, List, Any, Optional, Union
 from pydantic import BaseModel, Field
+from dataclasses import dataclass, field
 
 
 class StageType(str, Enum):
@@ -53,6 +54,9 @@ class StageConfig(BaseModel):
     # For connector_method stages
     connector: Optional[str] = Field(None, description="Connector name (source/target)")
     method: Optional[str] = Field(None, description="Method name to call on connector")
+    
+    # Credentials
+    credentials_key: Optional[str] = Field(None, description="Key for stage-specific credentials from credentials_config")
     
     # Parameters and data
     parameters: Dict[str, Any] = Field(default_factory=dict, description="Stage parameters")
@@ -102,6 +106,9 @@ class WorkflowConfig(BaseModel):
     # Connectors
     source: Dict[str, Any] = Field(..., description="Source connector configuration")
     target: Dict[str, Any] = Field(..., description="Target connector configuration")
+    
+    # Credentials configuration for per-stage credentials
+    credentials_config: Optional[Dict[str, Dict[str, Any]]] = Field(None, description="Named credential configurations for stages")
     
     # Workflow stages
     stages: List[StageConfig] = Field(..., description="Ordered list of stages")
@@ -157,9 +164,34 @@ class WorkflowUpdate(BaseModel):
     version: Optional[str] = None
     source: Optional[Dict[str, Any]] = None
     target: Optional[Dict[str, Any]] = None
+    credentials_config: Optional[Dict[str, Dict[str, Any]]] = None
     stages: Optional[List[StageConfig]] = None
     variables: Optional[Dict[str, Any]] = None
     timeout_seconds: Optional[int] = None
     schedule: Optional[str] = None
     active: Optional[bool] = None
     created_by: Optional[str] = None 
+
+
+@dataclass
+class IntegrationConfig:
+    """Configuration for an integration with default credentials."""
+    id: str
+    name: str
+    service_type: str  # e.g., "shipstation", "infiplex"
+    description: Optional[str] = None
+    default_credentials: Dict[str, Any] = field(default_factory=dict)
+    created_at: Optional[str] = None
+    updated_at: Optional[str] = None
+    
+    def model_dump(self) -> Dict[str, Any]:
+        """Convert to dictionary for Firestore storage."""
+        return {
+            "id": self.id,
+            "name": self.name,
+            "service_type": self.service_type,
+            "description": self.description,
+            "default_credentials": self.default_credentials,
+            "created_at": self.created_at,
+            "updated_at": self.updated_at
+        } 

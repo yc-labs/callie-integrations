@@ -8,7 +8,7 @@ from typing import Dict, List, Any, Optional
 from google.cloud import firestore
 from google.auth import default
 
-from ..models.stages import WorkflowConfig, WorkflowExecution
+from callie.models.stages import WorkflowConfig, StageConfig, WorkflowExecution, IntegrationConfig
 
 logger = logging.getLogger(__name__)
 
@@ -45,7 +45,7 @@ class FirestoreService:
     
     # Workflow Management (New Configurable System)
     
-    def create_workflow(self, workflow: WorkflowConfig) -> WorkflowConfig:
+    def create_workflow(self, workflow: WorkflowConfig, merge: bool = False) -> WorkflowConfig:
         """Create a new workflow configuration."""
         try:
             # Convert to dict for Firestore
@@ -55,7 +55,7 @@ class FirestoreService:
             
             # Store in Firestore
             doc_ref = self.db.collection(self.workflows_collection).document(workflow.id)
-            doc_ref.set(workflow_data)
+            doc_ref.set(workflow_data, merge=merge)
             
             logger.info(f"Created workflow: {workflow.id}")
             return workflow
@@ -200,3 +200,44 @@ class FirestoreService:
         except Exception as e:
             logger.error(f"Failed to update workflow execution {execution_id}: {e}")
             raise 
+
+    async def create_integration_config(self, config: IntegrationConfig, merge: bool = False) -> IntegrationConfig:
+        """Create or update an integration configuration."""
+        doc_ref = self.db.collection("integration_configs").document(config.id)
+        
+        config.updated_at = datetime.utcnow().isoformat()
+        if not config.created_at:
+            config.created_at = config.updated_at
+            
+        await doc_ref.set(config.model_dump(), merge=merge)
+        logger.info(f"Integration config {'updated' if merge else 'created'}: {config.id}")
+        return config
+
+    async def get_integration_config(self, integration_id: str) -> Optional[IntegrationConfig]:
+        """Get an integration configuration by ID."""
+        doc_ref = self.db.collection("integration_configs").document(integration_id)
+        doc = await doc_ref.get()
+        
+        if doc.exists:
+            data = doc.to_dict()
+            return IntegrationConfig(**data)
+        return None
+
+    async def list_integration_configs(self) -> List[IntegrationConfig]:
+        """List all integration configurations."""
+        collection_ref = self.db.collection("integration_configs")
+        docs = await collection_ref.get()
+        
+        configs = []
+        for doc in docs:
+            data = doc.to_dict()
+            configs.append(IntegrationConfig(**data))
+        
+        return configs
+
+    async def delete_integration_config(self, integration_id: str) -> bool:
+        """Delete an integration configuration."""
+        doc_ref = self.db.collection("integration_configs").document(integration_id)
+        await doc_ref.delete()
+        logger.info(f"Integration config deleted: {integration_id}")
+        return True 

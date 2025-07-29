@@ -5,6 +5,9 @@ Base connector class for all service integrations.
 from abc import ABC, abstractmethod
 from typing import Dict, List, Any, Optional
 from pydantic import BaseModel
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class ConnectorCapability(BaseModel):
@@ -36,26 +39,22 @@ class ConnectorSchema(BaseModel):
 
 
 class BaseConnector(ABC):
-    """
-    Base class for all service connectors.
+    """Abstract base class for connectors."""
     
-    Each connector represents a specific service (ShipStation, InfiPlex, etc.)
-    and provides standardized methods for reading and writing data.
-    """
-    
-    def __init__(self, credentials: Dict[str, Any], base_url: str, **kwargs):
+    def __init__(self, credentials: Optional[Dict[str, Any]] = None, base_url: Optional[str] = None, **kwargs):
         """
         Initialize the connector.
         
         Args:
-            credentials: Service-specific authentication credentials
-            base_url: Base URL for the service API
-            **kwargs: Additional service-specific configuration
+            credentials: Optional authentication credentials (can be provided per-method)
+            base_url: Optional base URL for API (can be provided per-method)
+            **kwargs: Additional configuration parameters
         """
-        self.credentials = credentials
+        self.credentials = credentials or {}
         self.base_url = base_url
         self.config = kwargs
-        self._validate_credentials()
+        # self._validate_credentials() # This is now handled by each connector method
+        logger.info(f"Initialized {self.__class__.__name__} connector")
     
     @abstractmethod
     def _validate_credentials(self) -> None:

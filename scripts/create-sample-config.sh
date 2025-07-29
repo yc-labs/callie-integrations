@@ -12,9 +12,9 @@ echo "🌐 Service URL: $SERVICE_URL"
 # Create the workflow configuration directly (no file dependency)
 WORKFLOW_JSON='{
   "id": "shipstation-to-infiplex-configurable",
-  "name": "ShipStation to InfiPlex Inventory Sync (Fully Configurable)",
-  "description": "Configurable workflow that gets InfiPlex SKUs, queries ShipStation for each, handles zero inventory, and bulk updates InfiPlex",
-  "version": "1.0",
+  "name": "ShipStation to InfiPlex Multi-Warehouse Inventory Sync",
+  "description": "Configurable workflow that syncs inventory from ShipStation to multiple InfiPlex warehouses (17 and 18)",
+  "version": "1.1",
   "source": {
     "service_type": "shipstation",
     "credentials": {
@@ -30,9 +30,18 @@ WORKFLOW_JSON='{
     "base_url": "${INFIPLEX_BASE_URL}",
     "warehouse_id": 17
   },
+  "credentials_config": {
+    "infiplex_warehouse_17": {
+      "secret_name": "infiplex-api-key",
+      "warehouse_id": 17
+    },
+    "infiplex_warehouse_18": {
+      "secret_name": "infiplex-warehouse-18-api-key",
+      "warehouse_id": 18
+    }
+  },
   "variables": {
-    "warehouse_id": 17,
-    "sync_description": "Configurable ShipStation to InfiPlex sync"
+    "sync_description": "Multi-warehouse ShipStation to InfiPlex sync"
   },
   "stages": [
     {
@@ -40,19 +49,22 @@ WORKFLOW_JSON='{
       "name": "Log Sync Start",
       "type": "log",
       "parameters": {
-        "message": "Starting {sync_description} for warehouse {warehouse_id}",
+        "message": "Starting {sync_description} for warehouses 17 and 18",
         "level": "info"
       }
     },
     {
-      "id": "get_infiplex_skus",
-      "name": "Get InfiPlex SKUs",
-      "description": "Get all SKUs from InfiPlex to determine what to sync",
+      "id": "get_infiplex_skus_wh17",
+      "name": "Get InfiPlex SKUs (Warehouse 17)",
+      "description": "Get SKUs from InfiPlex warehouse 17 to determine what to sync",
       "type": "connector_method",
       "connector": "target",
       "method": "read_inventory",
-      "parameters": {},
-      "output_variable": "infiplex_inventory",
+      "credentials_key": "infiplex_warehouse_17",
+      "parameters": {
+        "warehouse_id": 17
+      },
+      "output_variable": "infiplex_inventory_wh17",
       "error_strategy": "fail"
     },
     {
@@ -60,13 +72,13 @@ WORKFLOW_JSON='{
       "name": "Extract SKU List",
       "description": "Extract just the SKUs from InfiPlex inventory data",
       "type": "transform",
-      "input_variables": ["infiplex_inventory"],
+      "input_variables": ["infiplex_inventory_wh17"],
       "parameters": {
         "transform_type": "extract_field",
         "field": "sku"
       },
       "output_variable": "target_skus",
-      "depends_on": ["get_infiplex_skus"]
+      "depends_on": ["get_infiplex_skus_wh17"]
     },
     {
       "id": "log_sku_count",
@@ -117,9 +129,9 @@ WORKFLOW_JSON='{
       "depends_on": ["get_shipstation_inventory"]
     },
     {
-      "id": "add_warehouse_id",
-      "name": "Add Warehouse ID",
-      "description": "Add warehouse_id to each inventory item",
+      "id": "add_warehouse_id_wh17",
+      "name": "Add Warehouse ID (Warehouse 17)",
+      "description": "Add warehouse_id 17 to each inventory item",
       "type": "transform",
       "input_variables": ["mapped_inventory"],
       "parameters": {
@@ -127,30 +139,51 @@ WORKFLOW_JSON='{
         "field": "warehouse_id",
         "value": 17
       },
-      "output_variable": "final_inventory",
+      "output_variable": "items_wh17",
       "depends_on": ["map_inventory_fields"]
     },
     {
-      "id": "log_final_count",
-      "name": "Log Final Count",
-      "type": "log",
+      "id": "add_warehouse_id_wh18",
+      "name": "Add Warehouse ID (Warehouse 18)",
+      "description": "Add warehouse_id 18 to each inventory item",
+      "type": "transform",
+      "input_variables": ["mapped_inventory"],
       "parameters": {
-        "message": "Prepared {final_inventory} items for bulk update to InfiPlex",
-        "level": "info"
+        "transform_type": "add_field",
+        "field": "warehouse_id",
+        "value": 18
       },
-      "depends_on": ["add_warehouse_id"]
+      "output_variable": "items_wh18",
+      "depends_on": ["map_inventory_fields"]
     },
     {
-      "id": "bulk_update_infiplex",
-      "name": "Bulk Update InfiPlex",
-      "description": "Send bulk inventory update to InfiPlex",
+      "id": "bulk_update_infiplex_wh17",
+      "name": "Bulk Update InfiPlex (Warehouse 17)",
+      "description": "Send bulk inventory update to InfiPlex warehouse 17",
       "type": "connector_method",
       "connector": "target", 
-      "method": "_bulk_update_inventory",
-      "input_variables": ["final_inventory"],
+      "method": "_write_inventory",
+      "credentials_key": "infiplex_warehouse_17",
+      "input_variables": ["items_wh17"],
       "parameters": {},
-      "output_variable": "update_result",
-      "depends_on": ["add_warehouse_id"],
+      "output_variable": "update_result_wh17",
+      "depends_on": ["add_warehouse_id_wh17"],
+      "error_strategy": "fail",
+      "retry_count": 3,
+      "retry_delay": 10
+    },
+    {
+      "id": "bulk_update_infiplex_wh18",
+      "name": "Bulk Update InfiPlex (Warehouse 18)",
+      "description": "Send bulk inventory update to InfiPlex warehouse 18",
+      "type": "connector_method",
+      "connector": "target",
+      "method": "_write_inventory",
+      "credentials_key": "infiplex_warehouse_18",
+      "input_variables": ["items_wh18"],
+      "parameters": {},
+      "output_variable": "update_result_wh18",
+      "depends_on": ["add_warehouse_id_wh18"],
       "error_strategy": "fail",
       "retry_count": 3,
       "retry_delay": 10
@@ -160,10 +193,10 @@ WORKFLOW_JSON='{
       "name": "Log Completion",
       "type": "log",
       "parameters": {
-        "message": "Successfully completed {sync_description}. Result: {update_result}",
+        "message": "Successfully completed {sync_description}. WH17 Result: {update_result_wh17}, WH18 Result: {update_result_wh18}",
         "level": "info"
       },
-      "depends_on": ["bulk_update_infiplex"]
+      "depends_on": ["bulk_update_infiplex_wh17", "bulk_update_infiplex_wh18"]
     }
   ],
   "schedule": "0 */6 * * *",
@@ -207,7 +240,8 @@ if echo "$RESPONSE" | jq -e '.id' > /dev/null 2>&1; then
     echo "   • Workflow ID: $WORKFLOW_ID"
     echo "   • Schedule: Every 6 hours (0 */6 * * *)"
     echo "   • Source: ShipStation (available inventory)"
-    echo "   • Target: InfiPlex Warehouse 17"
+    echo "   • Target: InfiPlex Warehouses 17 and 18"
+    echo "   • Multi-warehouse sync with separate credentials"
     echo ""
     echo "🔗 Useful endpoints:"
     echo "   • Workflow: $SERVICE_URL/api/v1/workflows/$WORKFLOW_ID"

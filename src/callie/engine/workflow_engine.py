@@ -9,7 +9,9 @@ import logging
 import time
 import inspect
 from datetime import datetime
-from typing import Dict, List, Any, Optional, Type
+from typing import Dict, List, Any, Optional, Type, Union
+import os
+import asyncio
 
 from ..models.stages import (
     WorkflowConfig, WorkflowExecution, StageConfig, StageResult,
@@ -18,6 +20,7 @@ from ..models.stages import (
 from ..connectors.base import BaseConnector
 from ..connectors.shipstation import ShipStationConnector
 from ..connectors.infiplex import InfiPlexConnector
+from ..services.secrets import SecretManagerService
 
 logger = logging.getLogger(__name__)
 
@@ -30,6 +33,7 @@ class WorkflowExecutionContext:
         self.variables: Dict[str, Any] = workflow.variables.copy()
         self.stage_results: List[StageResult] = []
         self.connectors: Dict[str, BaseConnector] = {}
+        self.execution: Optional[WorkflowExecution] = None
 
     def set_variable(self, name: str, value: Any):
         """Set a variable in the context."""
@@ -50,14 +54,59 @@ class WorkflowExecutionContext:
 class WorkflowEngine:
     """Executes configurable stage-based workflows."""
 
-    def __init__(self):
+    def __init__(self, secret_service: Optional[SecretManagerService] = None):
         self.connector_classes = {
             "shipstation": ShipStationConnector,
             "infiplex": InfiPlexConnector
         }
+        self.integration_configs: Dict[str, Dict[str, Any]] = {}
+        if secret_service:
+            self.secret_service = secret_service
+        else:
+            # Fallback for older initialization paths, though app.py now provides it
+            project_id = os.getenv("GOOGLE_CLOUD_PROJECT")
+            if project_id:
+                self.secret_service = SecretManagerService(project_id=project_id)
+            else:
+                logger.warning("WorkflowEngine initialized without a SecretManagerService and no GOOGLE_CLOUD_PROJECT set.")
+                self.secret_service = None
 
-    def execute_workflow(self, workflow: WorkflowConfig, triggered_by: str = "manual") -> WorkflowExecution:
+    def load_integration_configs(self):
+        """Load integration configurations from Secret Manager using known secret names."""
+        if not self.secret_service:
+            logger.warning("SecretManagerService not available, skipping integration config loading.")
+            return
+
+        logger.info("Loading integration configurations from Secret Manager...")
+        try:
+            # Load ShipStation credentials
+            shipstation_api_key = self.secret_service.get_secret("shipstation-api-key")
+            shipstation_base_url = self.secret_service.get_secret("shipstation-base-url")
+            self.integration_configs["shipstation"] = {
+                "api_key": shipstation_api_key,
+                "base_url": shipstation_base_url
+            }
+            logger.info(f"Loaded ShipStation integration config: api_key={'*' * len(shipstation_api_key) if shipstation_api_key else 'None'}, base_url={shipstation_base_url}")
+
+            # Load InfiPlex credentials (default warehouse 17)
+            infiplex_api_key = self.secret_service.get_secret("infiplex-api-key")
+            infiplex_base_url = self.secret_service.get_secret("infiplex-base-url")
+            self.integration_configs["infiplex"] = {
+                "api_key": infiplex_api_key,
+                "base_url": infiplex_base_url
+            }
+            logger.info(f"Loaded InfiPlex integration config: api_key={'*' * len(infiplex_api_key) if infiplex_api_key else 'None'}, base_url={infiplex_base_url}")
+
+            logger.info(f"Successfully loaded {len(self.integration_configs)} integration configurations.")
+        except Exception as e:
+            logger.error(f"Failed to load integration configurations: {e}")
+            # Don't raise - let the workflow continue and individual stages can handle missing credentials
+
+    def execute_workflow(self, workflow: WorkflowConfig, triggered_by: str = "manual", initial_variables: Optional[Dict[str, Any]] = None) -> WorkflowExecution:
         """Execute a complete workflow."""
+        # Load integration configs before execution
+        self.load_integration_configs()
+        
         execution_id = f"workflow_{workflow.id}_{int(time.time())}"
         execution = WorkflowExecution(
             id=execution_id,
@@ -70,7 +119,9 @@ class WorkflowEngine:
 
         try:
             context = WorkflowExecutionContext(workflow)
-
+            if initial_variables:
+                context.variables.update(initial_variables)
+            
             # Initialize connectors
             self._initialize_connectors(workflow, context)
 
@@ -106,8 +157,6 @@ class WorkflowEngine:
             if execution.status == "running":
                 execution.status = "completed"
 
-            execution.final_variables = context.variables.copy()
-
         except Exception as e:
             logger.error(f"Workflow execution failed: {e}")
             execution.status = "failed"
@@ -120,44 +169,11 @@ class WorkflowEngine:
                     execution.completed_at - execution.started_at
                 ).total_seconds()
 
-        logger.info(f"Workflow execution completed: {execution.status}")
+            # Store execution in context for potential access
+            context.execution = execution
+
+        logger.info(f"Workflow execution completed: {execution_id} - Status: {execution.status}")
         return execution
-
-    def _initialize_connectors(self, workflow: WorkflowConfig, context: WorkflowExecutionContext):
-        """Initialize connector instances."""
-        # Initialize source connector
-        source_config = workflow.source
-        source_type = source_config.get("service_type")
-        if source_type in self.connector_classes:
-            connector_class = self.connector_classes[source_type]
-            context.connectors["source"] = connector_class(
-                credentials=source_config.get("credentials", {}),
-                base_url=source_config.get("base_url"),
-                **{k: v for k, v in source_config.items()
-                   if k not in ["service_type", "credentials", "base_url"]}
-            )
-
-        # Initialize target connector
-        target_config = workflow.target
-        target_type = target_config.get("service_type")
-        if target_type in self.connector_classes:
-            connector_class = self.connector_classes[target_type]
-            context.connectors["target"] = connector_class(
-                credentials=target_config.get("credentials", {}),
-                base_url=target_config.get("base_url"),
-                **{k: v for k, v in target_config.items()
-                   if k not in ["service_type", "credentials", "base_url"]}
-            )
-
-        logger.info(f"Initialized connectors: {list(context.connectors.keys())}")
-
-    def _check_dependencies(self, stage: StageConfig, context: WorkflowExecutionContext) -> bool:
-        """Check if stage dependencies are met."""
-        if not stage.depends_on:
-            return True
-
-        completed_stages = {r.stage_id for r in context.stage_results if r.status == "success"}
-        return all(dep_id in completed_stages for dep_id in stage.depends_on)
 
     def _execute_stage(self, stage: StageConfig, context: WorkflowExecutionContext) -> StageResult:
         """Execute a single stage."""
@@ -227,12 +243,49 @@ class WorkflowEngine:
         logger.info(f"Returning StageResult for {stage.id}: {result}")
         return result
 
+    def _initialize_connectors(self, workflow: WorkflowConfig, context: WorkflowExecutionContext):
+        """Initialize basic connector instances without credentials."""
+        # Initialize source connector (basic instance)
+        source_config = workflow.source
+        source_type = source_config.get("service_type")
+        if source_type in self.connector_classes:
+            connector_class = self.connector_classes[source_type]
+            # Create basic connector without credentials - credentials handled per-stage
+            context.connectors["source"] = connector_class()
+
+        # Initialize target connector (basic instance)
+        target_config = workflow.target
+        target_type = target_config.get("service_type")
+        if target_type in self.connector_classes:
+            connector_class = self.connector_classes[target_type]
+            # Create basic connector without credentials - credentials handled per-stage
+            context.connectors["target"] = connector_class()
+
+        logger.info(f"Initialized basic connectors: {list(context.connectors.keys())}")
+
+    def _check_dependencies(self, stage: StageConfig, context: WorkflowExecutionContext) -> bool:
+        """Check if stage dependencies are met."""
+        if not stage.depends_on:
+            return True
+
+        completed_stages = {r.stage_id for r in context.stage_results if r.status == "success"}
+        return all(dep_id in completed_stages for dep_id in stage.depends_on)
+
+    def _get_stage_connector(self, stage: StageConfig, context: WorkflowExecutionContext) -> BaseConnector:
+        """Get connector for a specific stage."""
+        connector_name = stage.connector
+        
+        # SIMPLIFIED: Always use the basic connector
+        # Credentials are handled in _execute_connector_method via credentials_key
+        return context.get_connector(connector_name)
+
     def _execute_connector_method(self, stage: StageConfig, context: WorkflowExecutionContext) -> Any:
         """Execute a connector method dynamically."""
         if not stage.connector or not stage.method:
             raise ValueError(f"Stage {stage.id}: connector and method are required for connector_method type")
 
-        connector = context.get_connector(stage.connector)
+        # Get the appropriate connector (default or stage-specific)
+        connector = self._get_stage_connector(stage, context)
         method_name = stage.method
 
         if not hasattr(connector, method_name):
@@ -242,6 +295,7 @@ class WorkflowEngine:
 
         # Prepare method arguments
         method_args = {}
+        sig = inspect.signature(method)
 
         # Add parameters from stage config
         method_args.update(stage.parameters)
@@ -251,8 +305,36 @@ class WorkflowEngine:
             if var_name in context.variables:
                 method_args[var_name] = context.variables[var_name]
 
+        # New simplified credential system using integration configs
+        connector_type = None
+        if stage.connector == "source":
+            connector_type = "shipstation"
+        elif stage.connector == "target":
+            connector_type = "infiplex"
+        
+        if connector_type:
+            try:
+                credentials = self.integration_configs.get(connector_type)
+                logger.info(f"Looking up credentials for {connector_type}: {credentials is not None}")
+                
+                # Add credentials to method args if the method expects them
+                if credentials and "api_key" in sig.parameters and "api_key" in credentials:
+                    method_args["api_key"] = credentials["api_key"]
+                    logger.info(f"Added API key for {connector_type} connector")
+                else:
+                    logger.warning(f"No API key available for {connector_type} connector. Credentials: {credentials is not None}, sig has api_key: {'api_key' in sig.parameters}")
+                
+                if credentials and "base_url" in sig.parameters and "base_url" in credentials:
+                    method_args["base_url"] = credentials["base_url"]
+                    logger.info(f"Added base URL for {connector_type} connector")
+                else:
+                    logger.warning(f"No base URL available for {connector_type} connector. Credentials: {credentials is not None}, sig has base_url: {'base_url' in sig.parameters}")
+                    
+            except Exception as e:
+                logger.error(f"Failed to get credentials for {connector_type}: {e}")
+                # Continue execution - let the connector handle missing credentials
+
         # Filter arguments to only include those the method accepts
-        sig = inspect.signature(method)
         
         # Check if method accepts **kwargs (VAR_KEYWORD)
         accepts_kwargs = any(
@@ -271,6 +353,7 @@ class WorkflowEngine:
             }
 
         logger.info(f"Calling {stage.connector}.{method_name} with args: {list(filtered_args.keys())}")
+        logger.info(f"Full arguments: {filtered_args}")
 
         # Call the method
         return method(**filtered_args)
@@ -314,6 +397,11 @@ class WorkflowEngine:
                 result = input_data.copy()
                 result[field] = value
                 return result
+        elif transform_type == "slice":
+            start = stage.parameters.get("start", 0)
+            end = stage.parameters.get("end", 5)
+            if isinstance(input_data, list):
+                return input_data[start:end]
 
         return input_data
 
@@ -326,10 +414,17 @@ class WorkflowEngine:
         if not isinstance(input_data, list):
             return input_data
 
-        # Simple filtering for now
         filter_field = stage.parameters.get("field")
-        filter_value = stage.parameters.get("value")
+        value_from_variable = stage.parameters.get("value_from_variable")
 
+        if filter_field and value_from_variable:
+            filter_values = context.get_variable(value_from_variable)
+            if isinstance(filter_values, list):
+                filter_set = set(filter_values)
+                return [item for item in input_data if item.get(filter_field) in filter_set]
+
+        # Fallback to original simple filter
+        filter_value = stage.parameters.get("value")
         if filter_field and filter_value is not None:
             return [item for item in input_data if item.get(filter_field) == filter_value]
 
@@ -370,7 +465,16 @@ class WorkflowEngine:
 
         # Replace variables in message
         for var_name, var_value in context.variables.items():
-            message = message.replace(f"{{{var_name}}}", str(var_value))
+            placeholder = f"{{{var_name}}}"
+            if placeholder in message:
+                message = message.replace(placeholder, str(var_value))
+            
+            len_placeholder = f"{{len({var_name})}}"
+            if len_placeholder in message:
+                if isinstance(var_value, list):
+                    message = message.replace(len_placeholder, str(len(var_value)))
+                else:
+                    message = message.replace(len_placeholder, "N/A")
 
         if log_level == "debug":
             logger.debug(message)
