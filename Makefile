@@ -1,4 +1,4 @@
-.PHONY: help install run-local test-local build-api push-api deploy-api create-workflow trigger-sync
+.PHONY: help install run-local test-local build-api push-api deploy-api
 
 # ====================================================================================
 # HELP
@@ -23,39 +23,27 @@ install:
 	poetry install
 
 run-local:
-	docker-compose up --build
+	docker-compose up
 
 test-local:
-	@echo "🧪 Testing local API health..."
-	@curl -f -s http://localhost:8000/health
-	@echo "\n✅ API is healthy."
-	@echo "\n🚀 Triggering the final multi-warehouse sync workflow..."
-	@curl -X POST http://localhost:8000/api/v1/workflows/shipstation-to-infiplex-multi-warehouse-fixed/execute-sync | jq
-	@echo "\n✅ Workflow triggered."
+	@echo "Testing workflow creation..."
+	@curl -X POST -H "Content-Type: application/json" -d @workflows/shipstation-to-infiplex-configurable.json http://localhost:8000/api/v1/workflows
+	@echo "\n\nTesting workflow execution..."
+	@curl -X POST http://localhost:8000/api/v1/workflows/shipstation-to-infiplex-configurable/execute
 
 # ====================================================================================
 # DEPLOYMENT
 # ====================================================================================
 
 build-api:
-	@echo "🏗️ Building API image with Cloud Build..."
-	@VERSION=$$(python -c "from src.callie.version import get_docker_tag; print(get_docker_tag())") && \
-	COMMIT_SHA=$$(git rev-parse --short HEAD) && \
-	gcloud builds submit --config cloudbuild.api.yaml --substitutions=_VERSION=$$VERSION,_COMMIT_SHA=$$COMMIT_SHA .
+	gcloud builds submit --config cloudbuild.api.yaml .
 
-deploy-api: build-api
-	@echo "🚀 Deploying API to Cloud Run..."
-	@bash scripts/deploy-api.sh
+push-api:
+	@echo "This step is handled by the cloudbuild.api.yaml file."
 
-# ====================================================================================
-# WORKFLOW MANAGEMENT
-# ====================================================================================
-
-create-workflow:
-	@echo "📝 Creating/updating the final multi-warehouse workflow in Firestore..."
-	docker-compose exec callie-api python /app/scripts/create_multi_warehouse_sync_workflow.py
-
-trigger-sync:
-	@SERVICE_URL=$$(gcloud run services describe callie-api --region us-central1 --format="value(status.url)") && \
-	echo "🚀 Triggering sync on Cloud Run: $$SERVICE_URL" && \
-	curl -X POST $$SERVICE_URL/api/v1/workflows/shipstation-to-infiplex-multi-warehouse-fixed/execute-sync | jq 
+deploy-api:
+	gcloud run deploy callie-api \
+		--image us-central1-docker.pkg.dev/$(gcloud config get-value project)/callie-api/callie-api:latest \
+		--platform managed \
+		--region us-central1 \
+		--allow-unauthenticated 

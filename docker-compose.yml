@@ -9,13 +9,11 @@ services:
       - "8000:8000"
     environment:
       - PORT=8000
-      - GCP_PROJECT_ID=yc-partners
-      - GOOGLE_APPLICATION_CREDENTIALS=/app/credentials.json
-      - SHIPSTATION_API_KEY=${SHIPSTATION_API_KEY}
-      - INFIPLEX_API_KEY=${INFIPLEX_API_KEY}
+      - GOOGLE_CLOUD_PROJECT=yc-partners
     volumes:
-      - ./credentials.json:/app/credentials.json:ro  # Mount service account key
+      - ~/.config/gcloud:/home/app/.config/gcloud:ro  # Mount gcloud config for ADC
       - ./src:/app/src  # Mount source for hot reload during development
+      - ./scripts:/app/scripts  # Mount scripts for workflow creation
     command: ["poetry", "run", "python", "-m", "callie.api.app"]
     restart: unless-stopped
     networks:

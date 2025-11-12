@@ -90,7 +90,7 @@ class InfiPlexConnector(BaseConnector):
             logger.error(f"InfiPlex connection test failed: {e}")
             return False
     
-    def _read_inventory(self, api_key: str, base_url: str, **filters) -> List[Dict[str, Any]]:
+    def _read_inventory(self, **filters) -> List[Dict[str, Any]]:
         """
         Read inventory from InfiPlex with automatic pagination to fetch ALL items.
         
@@ -101,6 +101,10 @@ class InfiPlexConnector(BaseConnector):
         - max_items: Maximum total items to fetch across all pages (optional, fetches ALL items if not specified)
         - is_active: Filter active/inactive items
         """
+        
+        api_key = self.credentials.get("api_key")
+        base_url = self.base_url
+
         try:
             all_items = []
             page_size = min(filters.get("limit", 100), 100)  # Max 100 per API call
@@ -177,35 +181,44 @@ class InfiPlexConnector(BaseConnector):
         except Exception as e:
             raise InfiPlexAPIError(f"Unexpected error: {e}")
     
-    def _write_inventory(self, items: List[Dict[str, Any]] = None, api_key: str = None, base_url: str = None, **kwargs) -> Dict[str, Any]:
-        """
-        Write inventory to InfiPlex.
-        """
-        if items is None:
-            for key, value in kwargs.items():
-                if ('inventory' in key or 'payload' in key) and isinstance(value, list):
-                    items = value
-                    break
+    def _write_inventory(self, items: List[Dict[str, Any]], create_products: bool = False, **kwargs) -> Dict[str, Any]:
+        """Write inventory to InfiPlex, with optional product creation."""
+        # This logic assumes `items` is a list of dictionaries, each containing at least 'sku' and 'quantity_to_set'.
+        # The `create_products` flag determines whether to create products that don't exist.
         
+        api_key = self.credentials.get("api_key")
+        base_url = self.base_url
+
         if not items:
             return {"success": 0, "failed": 0, "total": 0}
 
-        default_warehouse_id = self.config.get("warehouse_id")
+        if create_products:
+            logger.info("Product creation is ENABLED. Checking for and creating missing products...")
+            for item in items:
+                try:
+                    # Check if product exists
+                    self._make_request("get", f"api/admin/shop/product/get/{item['sku']}")
+                except InfiPlexAPIError as e:
+                    if "not found" in str(e).lower(): # Simple check; might need refinement
+                        logger.info(f"Product with SKU '{item['sku']}' not found. Creating it...")
+                        # Product doesn't exist, create it
+                        product_payload = {
+                            "sku": item["sku"],
+                            "product_name": item.get("product_name", item["sku"])
+                        }
+                        try:
+                            self._make_request("post", "api/admin/shop/product/add", json=product_payload)
+                        except InfiPlexAPIError as create_e:
+                            logger.error(f"Failed to create product for SKU '{item['sku']}': {create_e}")
+                            # Decide if you want to stop or continue
+                    else:
+                        # Re-raise if it's some other API error (like auth)
+                        raise e
+        else:
+            logger.info("Product creation is DISABLED. Proceeding directly to inventory update.")
 
-        try:
-            filtered_items = self._filter_existing_skus(items, default_warehouse_id, api_key, base_url)
-            
-            if not filtered_items:
-                return {"success": 0, "failed": len(items), "total": len(items)}
-
-            if len(filtered_items) > 1:
-                return self._bulk_update_inventory(filtered_items, default_warehouse_id, api_key, base_url)
-            else:
-                return self._single_update_inventory(filtered_items[0], default_warehouse_id, api_key, base_url)
-                
-        except Exception as e:
-            logger.error(f"An unexpected error occurred in _write_inventory: {e}", exc_info=True)
-            return {"success": 0, "failed": len(items), "total": len(items), "error": str(e)}
+        # At this point, we attempt to update inventory for all items.
+        return self._bulk_update_inventory(items, self.config.get("warehouse_id"), api_key, base_url)
     
     def _filter_existing_skus(self, items: List[Dict[str, Any]], default_warehouse_id: Optional[int], api_key: str, base_url: str) -> List[Dict[str, Any]]:
         """

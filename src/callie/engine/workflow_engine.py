@@ -71,41 +71,62 @@ class WorkflowEngine:
                 logger.warning("WorkflowEngine initialized without a SecretManagerService and no GOOGLE_CLOUD_PROJECT set.")
                 self.secret_service = None
 
-    def load_integration_configs(self):
-        """Load integration configurations from Secret Manager using known secret names."""
-        if not self.secret_service:
-            logger.warning("SecretManagerService not available, skipping integration config loading.")
-            return
+    def load_integration_configs(self, workflow: WorkflowConfig):
+        """Load configs for all integrations in a workflow."""
+        # Source connector
+        source_config = workflow.source
+        source_type = source_config.get("service_type")
+        if source_type:
+            self.integration_configs[source_type] = self._resolve_secrets(source_config)
 
-        logger.info("Loading integration configurations from Secret Manager...")
-        try:
-            # Load ShipStation credentials
-            shipstation_api_key = self.secret_service.get_secret("shipstation-api-key")
-            shipstation_base_url = self.secret_service.get_secret("shipstation-base-url")
-            self.integration_configs["shipstation"] = {
-                "api_key": shipstation_api_key,
-                "base_url": shipstation_base_url
-            }
-            logger.info(f"Loaded ShipStation integration config: api_key={'*' * len(shipstation_api_key) if shipstation_api_key else 'None'}, base_url={shipstation_base_url}")
+        # Target connector
+        target_config = workflow.target
+        target_type = target_config.get("service_type")
+        if target_type:
+            self.integration_configs[target_type] = self._resolve_secrets(target_config)
+            
+        logger.info(f"Loaded integration configs for: {list(self.integration_configs.keys())}")
 
-            # Load InfiPlex credentials (default warehouse 17)
-            infiplex_api_key = self.secret_service.get_secret("infiplex-api-key")
-            infiplex_base_url = self.secret_service.get_secret("infiplex-base-url")
-            self.integration_configs["infiplex"] = {
-                "api_key": infiplex_api_key,
-                "base_url": infiplex_base_url
-            }
-            logger.info(f"Loaded InfiPlex integration config: api_key={'*' * len(infiplex_api_key) if infiplex_api_key else 'None'}, base_url={infiplex_base_url}")
-
-            logger.info(f"Successfully loaded {len(self.integration_configs)} integration configurations.")
-        except Exception as e:
-            logger.error(f"Failed to load integration configurations: {e}")
-            # Don't raise - let the workflow continue and individual stages can handle missing credentials
+    def _resolve_secrets(self, config: Dict[str, Any]) -> Dict[str, Any]:
+        """Resolve secrets in a connector configuration."""
+        resolved_config = {}
+        
+        # Resolve credentials
+        credentials = {}
+        raw_credentials = config.get("credentials", {})
+        for key, value in raw_credentials.items():
+            if isinstance(value, str) and value.startswith("${") and value.endswith("}"):
+                secret_name = value[2:-1]
+                try:
+                    credentials[key] = self.secret_service.get_secret(secret_name)
+                except Exception as e:
+                    logger.error(f"Failed to resolve secret '{secret_name}': {e}")
+                    # Keep the placeholder so it's obvious there's an issue
+                    credentials[key] = value
+            else:
+                credentials[key] = value
+        resolved_config["credentials"] = credentials
+        
+        # Resolve base_url
+        base_url = ""
+        raw_base_url = config.get("base_url", "")
+        if isinstance(raw_base_url, str) and raw_base_url.startswith("${") and raw_base_url.endswith("}"):
+            secret_name = raw_base_url[2:-1]
+            try:
+                base_url = self.secret_service.get_secret(secret_name)
+            except Exception as e:
+                logger.error(f"Failed to resolve base_url secret '{secret_name}': {e}")
+                base_url = raw_base_url
+        else:
+            base_url = raw_base_url
+        resolved_config["base_url"] = base_url
+            
+        return resolved_config
 
     def execute_workflow(self, workflow: WorkflowConfig, triggered_by: str = "manual", initial_variables: Optional[Dict[str, Any]] = None) -> WorkflowExecution:
         """Execute a complete workflow."""
-        # Load integration configs before execution
-        self.load_integration_configs()
+        # Load integration configs for this specific workflow run
+        self.load_integration_configs(workflow)
         
         execution_id = f"workflow_{workflow.id}_{int(time.time())}"
         execution = WorkflowExecution(
@@ -284,7 +305,7 @@ class WorkflowEngine:
         if not stage.connector or not stage.method:
             raise ValueError(f"Stage {stage.id}: connector and method are required for connector_method type")
 
-        # Get the appropriate connector (default or stage-specific)
+                # The connector instance is already fully configured with credentials
         connector = self._get_stage_connector(stage, context)
         method_name = stage.method
 
@@ -305,38 +326,7 @@ class WorkflowEngine:
             if var_name in context.variables:
                 method_args[var_name] = context.variables[var_name]
 
-        # New simplified credential system using integration configs
-        connector_type = None
-        if stage.connector == "source":
-            connector_type = "shipstation"
-        elif stage.connector == "target":
-            connector_type = "infiplex"
-        
-        if connector_type:
-            try:
-                credentials = self.integration_configs.get(connector_type)
-                logger.info(f"Looking up credentials for {connector_type}: {credentials is not None}")
-                
-                # Add credentials to method args if the method expects them
-                if credentials and "api_key" in sig.parameters and "api_key" in credentials:
-                    method_args["api_key"] = credentials["api_key"]
-                    logger.info(f"Added API key for {connector_type} connector")
-                else:
-                    logger.warning(f"No API key available for {connector_type} connector. Credentials: {credentials is not None}, sig has api_key: {'api_key' in sig.parameters}")
-                
-                if credentials and "base_url" in sig.parameters and "base_url" in credentials:
-                    method_args["base_url"] = credentials["base_url"]
-                    logger.info(f"Added base URL for {connector_type} connector")
-                else:
-                    logger.warning(f"No base URL available for {connector_type} connector. Credentials: {credentials is not None}, sig has base_url: {'base_url' in sig.parameters}")
-                    
-            except Exception as e:
-                logger.error(f"Failed to get credentials for {connector_type}: {e}")
-                # Continue execution - let the connector handle missing credentials
-
         # Filter arguments to only include those the method accepts
-        
-        # Check if method accepts **kwargs (VAR_KEYWORD)
         accepts_kwargs = any(
             param.kind == inspect.Parameter.VAR_KEYWORD 
             for param in sig.parameters.values()
@@ -354,8 +344,7 @@ class WorkflowEngine:
 
         logger.info(f"Calling {stage.connector}.{method_name} with args: {list(filtered_args.keys())}")
         logger.info(f"Full arguments: {filtered_args}")
-
-        # Call the method
+        
         return method(**filtered_args)
 
     def _execute_transform(self, stage: StageConfig, context: WorkflowExecutionContext) -> Any:

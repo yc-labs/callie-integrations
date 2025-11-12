@@ -33,4 +33,8 @@ class ShipStationAPIError(ConnectorError):
 
 class InfiPlexAPIError(ConnectorError):
     """Exception raised for InfiPlex API errors."""
-    pass 
+    pass
+
+class FeedonomicsAPIError(ConnectorError):
+    """Exception raised for Feedonomics API errors."""
+    pass

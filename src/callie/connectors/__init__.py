@@ -8,21 +8,24 @@ for data synchronization operations.
 from .base import BaseConnector
 from .shipstation import ShipStationConnector
 from .infiplex import InfiPlexConnector
+from .feedonomics import FeedonomicsConnector
 
 __all__ = [
     "BaseConnector",
     "ShipStationConnector", 
     "InfiPlexConnector",
+    "FeedonomicsConnector",
 ]
 
 # Connector registry for dynamic loading
 CONNECTOR_REGISTRY = {
     "shipstation": ShipStationConnector,
     "infiplex": InfiPlexConnector,
+    "feedonomics": FeedonomicsConnector,
 }
 
 def get_connector(service_type: str) -> BaseConnector:
     """Get a connector instance by service type."""
     if service_type not in CONNECTOR_REGISTRY:
         raise ValueError(f"Unknown service type: {service_type}")
-    return CONNECTOR_REGISTRY[service_type] 
+    return CONNECTOR_REGISTRY[service_type]

@@ -85,27 +85,28 @@ class BaseConnector(ABC):
             raise NotImplementedError(f"{self.__class__.__name__} does not support reading inventory")
         return self._read_inventory(**filters)
     
-    def write_inventory(self, items: List[Dict[str, Any]]) -> Dict[str, Any]:
+    def write_inventory(self, items: List[Dict[str, Any]], create_products: bool = False) -> Dict[str, Any]:
         """
         Write inventory data to the service.
         
         Args:
             items: List of inventory items to write
+            create_products: If True, create products if they don't exist
             
         Returns:
             Dictionary with sync results
         """
         if not self.get_capabilities().can_write_inventory:
             raise NotImplementedError(f"{self.__class__.__name__} does not support writing inventory")
-        return self._write_inventory(items)
-    
+        return self._write_inventory(items, create_products=create_products)
+
     @abstractmethod
     def _read_inventory(self, **filters) -> List[Dict[str, Any]]:
         """Service-specific inventory reading implementation."""
         pass
     
     @abstractmethod
-    def _write_inventory(self, items: List[Dict[str, Any]]) -> Dict[str, Any]:
+    def _write_inventory(self, items: List[Dict[str, Any]], create_products: bool = False) -> Dict[str, Any]:
         """Service-specific inventory writing implementation.""" 
         pass
     

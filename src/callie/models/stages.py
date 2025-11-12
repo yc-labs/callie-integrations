@@ -9,7 +9,6 @@ from datetime import datetime
 from enum import Enum
 from typing import Dict, List, Any, Optional, Union
 from pydantic import BaseModel, Field
-from dataclasses import dataclass, field
 
 
 class StageType(str, Enum):
@@ -171,27 +170,3 @@ class WorkflowUpdate(BaseModel):
     schedule: Optional[str] = None
     active: Optional[bool] = None
     created_by: Optional[str] = None 
-
-
-@dataclass
-class IntegrationConfig:
-    """Configuration for an integration with default credentials."""
-    id: str
-    name: str
-    service_type: str  # e.g., "shipstation", "infiplex"
-    description: Optional[str] = None
-    default_credentials: Dict[str, Any] = field(default_factory=dict)
-    created_at: Optional[str] = None
-    updated_at: Optional[str] = None
-    
-    def model_dump(self) -> Dict[str, Any]:
-        """Convert to dictionary for Firestore storage."""
-        return {
-            "id": self.id,
-            "name": self.name,
-            "service_type": self.service_type,
-            "description": self.description,
-            "default_credentials": self.default_credentials,
-            "created_at": self.created_at,
-            "updated_at": self.updated_at
-        } 

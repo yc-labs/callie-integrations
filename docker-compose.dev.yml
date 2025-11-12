@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  callie-api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    ports:
+      - "8000:8000"
+    environment:
+      - PORT=8000
+      - GOOGLE_CLOUD_PROJECT=yc-partners
+      - GCP_PROJECT_ID=yc-partners
+      - GOOGLE_APPLICATION_CREDENTIALS=/app/gcloud_credentials.json
+      - SHIPSTATION_API_KEY=${SHIPSTATION_API_KEY}
+      - INFIPLEX_API_KEY=${INFIPLEX_API_KEY}
+    volumes:
+      - ./src:/app/src  # Mount source for hot reload during development
+    restart: unless-stopped
+    networks:
+      - callie-network
+
+  callie-ui-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend.dev
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - NEXT_PUBLIC_API_URL=http://localhost:8000/api/v1
+      - CHOKIDAR_USEPOLLING=true
+    volumes:
+      - ./frontend:/app  # Mount entire frontend directory for hot reload
+      - /app/node_modules  # Anonymous volume to prevent overwriting node_modules
+    depends_on:
+      - callie-api
+    restart: unless-stopped
+    networks:
+      - callie-network
+
+networks:
+  callie-network:
+    driver: bridge 

@@ -11,6 +11,10 @@ from fastapi import FastAPI, HTTPException, Depends, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
+# Set Google Cloud credentials manually if not already set
+if not os.getenv("GOOGLE_APPLICATION_CREDENTIALS"):
+    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "/app/gcloud_credentials.json"
+
 from ..models.stages import WorkflowConfig, WorkflowExecution, WorkflowUpdate
 from ..services.firestore import FirestoreService
 from ..services.scheduler import SchedulerService
@@ -366,13 +370,24 @@ async def execute_workflow_sync(
                 logger.info(f"Retrieved credentials from Secret Manager: {list(credentials.keys())}")
             except Exception as e:
                 logger.error(f"Failed to get credentials from Secret Manager: {e}")
-
+        
+        # Fall back to environment variables if no secret service or secret retrieval failed
+        if not credentials:
+            logger.info("Using environment variables for credentials")
+            credentials = {
+                "SHIPSTATION_API_KEY": os.getenv("SHIPSTATION_API_KEY", ""),
+                "SHIPSTATION_BASE_URL": os.getenv("SHIPSTATION_BASE_URL", "https://api.shipstation.com"),
+                "INFIPLEX_API_KEY": os.getenv("INFIPLEX_API_KEY", ""),
+                "INFIPLEX_BASE_URL": os.getenv("INFIPLEX_BASE_URL", ""),
+                "API_BASE_URL": os.getenv("API_BASE_URL", "http://localhost:8000"),
+            }
+        
+        # Inject credentials into workflow
+        workflow_with_credentials = inject_credentials_into_workflow(workflow, credentials)
+        logger.info(f"Injected credentials into workflow")
+        
         # Execute workflow synchronously
-        try:
-            execution = workflow_engine.execute_workflow(workflow, triggered_by="manual-sync", initial_variables=credentials)
-        except Exception as e:
-            logger.error(f"Error in execute_workflow: {e}", exc_info=True)
-            raise HTTPException(status_code=500, detail="Error executing workflow.")
+        execution = workflow_engine.execute_workflow(workflow_with_credentials, triggered_by="manual-sync")
         
         return execution
         
@@ -384,11 +399,6 @@ async def execute_workflow_sync(
         raise HTTPException(status_code=500, detail=str(e))
     except Exception as e:
         logger.error(f"An unexpected error occurred during workflow execution {workflow_id}: {e}")
-        # Return the execution object even if it failed partway through
-        if 'execution' in locals():
-            execution.status = "failed"
-            execution.error_message = f"An unexpected error occurred: {e}"
-            return execution
         raise HTTPException(status_code=500, detail="An unexpected error occurred.")
 
 
